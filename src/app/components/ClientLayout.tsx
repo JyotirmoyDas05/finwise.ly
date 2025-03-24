@@ -9,11 +9,11 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isAuthPage = pathname === '/login' || pathname === '/signup';
+  const showNavbar = pathname === '/'; // Only show navbar on the landing page
 
   return (
     <>
-      {!isAuthPage && <Header />}
+      {showNavbar && <Header />}
       {children}
     </>
   );

@@ -6,6 +6,11 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import Image from 'next/image';
 
+interface FirebaseError {
+  message: string;
+  code?: string;
+}
+
 export default function SignUp() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -31,9 +36,10 @@ export default function SignUp() {
 
     try {
       await signUp(email, password);
-      router.push('/dashboard');
-    } catch (error: any) {
-      setError(error.message || 'Failed to create account');
+      router.push('/profile-setup');
+    } catch (error: unknown) {
+      const firebaseError = error as FirebaseError;
+      setError(firebaseError.message || 'Failed to create account');
     } finally {
       setLoading(false);
     }
@@ -42,9 +48,10 @@ export default function SignUp() {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
-      router.push('/dashboard');
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign up with Google');
+      router.push('/profile-setup');
+    } catch (error: unknown) {
+      const firebaseError = error as FirebaseError;
+      setError(firebaseError.message || 'Failed to sign up with Google');
     }
   };
 
