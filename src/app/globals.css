@@ -1,8 +1,37 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;600&display=swap');
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111827;
+  --primary: #3B82F6;
+  --primary-foreground: #ffffff;
+  --secondary: #10B981;
+  --secondary-foreground: #ffffff;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --border: #e5e7eb;
+  --green-light: #059669; /* Emerald 600 - for light mode */
+  --green-dark: #34d399; /* Emerald 400 - for dark mode */
+  --text-light: #111827; /* Dark text for light mode */
+  --text-dark: #f9fafb; /* Light text for dark mode */
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f9fafb;
+  --primary: #3B82F6;
+  --primary-foreground: #ffffff;
+  --secondary: #10B981;
+  --secondary-foreground: #ffffff;
+  --muted: #1f2937;
+  --muted-foreground: #9ca3af;
+  --border: #374151;
+  --green-light: #059669; /* Same as light mode for consistency */
+  --green-dark: #34d399; /* Same as light mode for consistency */
+  --text-light: #111827; /* Dark text for light mode */
+  --text-dark: #f9fafb; /* Light text for dark mode */
 }
 
 @theme inline {
@@ -12,15 +41,154 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  transition: background-color 0.3s ease;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: var(--text-dark);
+}
+
+/* Base typography */
+body, p, input, textarea, select {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+}
+
+/* Override base styles when specific font classes are used */
+.font-roboto {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+.font-roboto.font-normal {
+  font-weight: 400 !important;
+}
+
+.font-roboto.font-semibold {
+  font-weight: 600 !important;
+}
+
+/* Allow specific elements to use custom fonts */
+[class*="font-[Poppins]"] {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+[class*="font-[Roboto]"] {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+/* Improved text visibility */
+.text-foreground\/70 {
+  color: rgba(23, 23, 23, 0.85);
+}
+
+.dark .text-foreground\/70 {
+  color: rgba(249, 250, 251, 0.85);
+}
+
+p {
+  color: var(--text-light);
+}
+
+.dark p {
+  color: var(--text-dark);
+}
+
+/* Text color overrides for light mode */
+.text-dark-700 {
+  color: #374151; /* Darker shade for better contrast in light mode */
+}
+
+.dark .text-dark-700 {
+  color: #9ca3af; /* Keep existing color for dark mode */
+}
+
+.text-dark-900 {
+  color: #111827; /* Ensure headers are dark enough in light mode */
+}
+
+.dark .text-dark-900 {
+  color: #f9fafb; /* Ensure headers are light enough in dark mode */
+}
+
+.text-white {
+  color: var(--text-light) !important; /* Dark text in light mode */
+}
+
+.dark .text-white {
+  color: var(--text-dark) !important; /* Light text in dark mode */
+}
+
+/* Green text colors for light and dark modes */
+.text-green {
+  color: var(--green-light);
+}
+
+.dark .text-green {
+  color: var(--green-dark);
+}
+
+.hover\:text-green:hover {
+  color: var(--green-light);
+}
+
+.dark .hover\:text-green:hover {
+  color: var(--green-dark);
+}
+
+/* For links */
+.text-green-link {
+  color: var(--green-light);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.dark .text-green-link {
+  color: var(--green-dark);
+}
+
+.text-green-link:hover {
+  color: #047857; /* Emerald 700 for light mode hover */
+  text-decoration: underline;
+}
+
+.dark .text-green-link:hover {
+  color: #6ee7b7; /* Emerald 300 for dark mode hover */
+}
+
+/* Dark mode styling overrides */
+.dark .bg-white {
+  background-color: var(--background);
+}
+
+.dark .bg-gray-50, 
+.dark .bg-slate-50 {
+  background-color: var(--muted);
+}
+
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700 {
+  color: var(--foreground);
+}
+
+.dark .border-gray-100 {
+  border-color: var(--border);
+}
+
+.dark .shadow-md,
+.dark .shadow-lg,
+.dark .shadow-sm {
+  --tw-shadow-color: rgba(0, 0, 0, 0.5);
 }
