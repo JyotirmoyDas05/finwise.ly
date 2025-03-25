@@ -48,7 +48,7 @@ const Hero = () => {
               </span> Guidance!
             </h1>
             <p className="font-body text-lg md:text-xl font-medium text-dark-700 dark:text-gray-300 mb-8 leading-relaxed">
-              Get real-time financial advice, track expenses, and <span className="text-green font-semibold">improve your money habits</span>.
+              Get real-time financial advice, track expenses,Learn and <span className="text-green font-semibold">improve your money habits</span>.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link 

@@ -1,207 +1,286 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Bell, LogOut, Plus, Target, MessageSquare } from 'lucide-react';
-import {
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Cell,
-} from 'recharts';
-
-interface ExpenseData {
-  name: string;
-  value: number;
-}
-
-interface TrendData {
-  month: string;
-  income: number;
-  expenses: number;
-}
-
-// Mock data - Replace with real data from your backend
-const mockExpenseData: ExpenseData[] = [
-  { name: 'Food', value: 400 },
-  { name: 'Transport', value: 300 },
-  { name: 'Entertainment', value: 200 },
-  { name: 'Bills', value: 600 },
-];
-
-const mockTrendData: TrendData[] = [
-  { month: 'Jan', income: 5000, expenses: 4000 },
-  { month: 'Feb', income: 5200, expenses: 3800 },
-  { month: 'Mar', income: 5400, expenses: 4200 },
-];
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+import { Suspense } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { PlusCircle, Target, MessageSquareText, Lightbulb } from "lucide-react"
+import { ExpenseBreakdownChart } from "@/components/expense-breakdown-chart"
+import { BudgetComparisonChart } from "@/components/budget-comparison-chart"
+import { EducationalCard } from "@/components/educational-card"
+import { VideoTutorialCard } from "@/components/video-tutorial-card"
+import { DashboardSkeleton } from "@/components/dashboard-skeleton"
+import { DashboardSidebar } from "@/components/dashboard-sidebar"
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Fetch user data and financial information
-    const fetchData = async () => {
-      try {
-        // Add your data fetching logic here
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  // Mock data - in a real app, this would come from your backend
+  const userData = {
+    name: "Rahul",
+    profileImage: "/placeholder.svg?height=40&width=40",
+    incomeVsExpenses: {
+      income: 50000,
+      expenses: 35000,
+    },
+    savingsProgress: 65,
+    nextGoal: {
+      name: "Emergency Fund",
+      target: 100000,
+      current: 65000,
+    },
+    expenseBreakdown: {
+      needs: 40,
+      wants: 30,
+      savings: 30,
+    },
+    budgetComparison: {
+      categories: ["Housing", "Food", "Transport", "Entertainment", "Dining"],
+      budget: [15000, 8000, 5000, 3000, 4000],
+      actual: [14000, 7500, 4800, 3500, 3900],
+    },
   }
 
+  // Determine feedback based on expense breakdown
+  const getFeedback = (needs: number, wants: number, savings: number) => {
+    if (savings >= 30) return "Great job!"
+    if (savings >= 20) return "Good progress!"
+    if (savings >= 10) return "You can do better!"
+    return "Let's improve your savings!"
+  }
+
+  // Calculate goal progress percentage
+  const goalProgress = (userData.nextGoal.current / userData.nextGoal.target) * 100
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <img
-              src={user?.photoURL || '/default-avatar.png'}
-              alt="Profile"
-              className="w-8 h-8 rounded-full"
-            />
-            <h2 className="text-lg font-semibold">Welcome, {user?.displayName}</h2>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => logout()}>
-              <LogOut className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="flex h-screen">
+      <DashboardSidebar />
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto px-4 py-6">
+          <Suspense fallback={<DashboardSkeleton />}>
+            {/* Welcome Section */}
+            <Card className="mb-6">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <div className="flex items-center space-x-4">
+                  <Avatar>
+                    <AvatarImage src={userData.profileImage} alt={userData.name} />
+                    <AvatarFallback>{userData.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <CardTitle className="text-2xl">Welcome, {userData.name}!</CardTitle>
+                    <CardDescription>Let's Make Finance Simple Today!</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm text-muted-foreground mb-4">
+                  <span className="inline-flex items-center">
+                    <Lightbulb className="h-4 w-4 mr-1 text-yellow-500" />
+                    {/* Space for AI tip */}
+                    <em>Tip: Try saving 20% of your income. It's easier than you think!</em>
+                  </span>
+                </div>
 
-      <main className="container py-6 space-y-8">
-        {/* Financial Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6">
-            <h3 className="font-medium text-sm text-muted-foreground">Monthly Income</h3>
-            <p className="text-2xl font-bold">$5,400</p>
-            <span className="text-green-500 text-sm">+8% from last month</span>
-          </Card>
-          <Card className="p-6">
-            <h3 className="font-medium text-sm text-muted-foreground">Expenses</h3>
-            <p className="text-2xl font-bold">$4,200</p>
-            <span className="text-red-500 text-sm">+5% from last month</span>
-          </Card>
-          <Card className="p-6">
-            <h3 className="font-medium text-sm text-muted-foreground">Savings</h3>
-            <p className="text-2xl font-bold">$1,200</p>
-            <span className="text-green-500 text-sm">80% of target</span>
-          </Card>
-          <Card className="p-6">
-            <h3 className="font-medium text-sm text-muted-foreground">Debt</h3>
-            <p className="text-2xl font-bold">$15,000</p>
-            <span className="text-muted-foreground text-sm">Student Loan</span>
-          </Card>
-        </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">Income vs. Expenses</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="text-2xl font-bold">₹{userData.incomeVsExpenses.income.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">Income</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold">₹{userData.incomeVsExpenses.expenses.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">Expenses</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-        {/* AI Insights */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">AI-Powered Insights</h3>
-          <div className="space-y-4">
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-primary/10 rounded-full">
-                <Target className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">Reduce dining expenses</p>
-                <p className="text-sm text-muted-foreground">
-                  Your dining expenses are 15% higher than last month. Consider cooking more meals at home.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-primary/10 rounded-full">
-                <Target className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">Investment Opportunity</p>
-                <p className="text-sm text-muted-foreground">
-                  Based on your risk profile, consider investing in index funds for long-term growth.
-                </p>
-              </div>
-            </div>
-          </div>
-        </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">Current Savings Progress</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <Progress value={userData.savingsProgress} className="h-2" />
+                        <p className="text-xs text-muted-foreground">{userData.savingsProgress}% of your target</p>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Expense Distribution</h3>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={mockExpenseData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }: { name: string; percent: number }) => 
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {mockExpenseData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Income & Expense Trends</h3>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={mockTrendData}>
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="income" stroke="#0088FE" strokeWidth={2} />
-                  <Line type="monotone" dataKey="expenses" stroke="#FF8042" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-        </div>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">Next Goal: {userData.nextGoal.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <Progress value={goalProgress} className="h-2" />
+                        <div className="flex justify-between">
+                          <p className="text-xs text-muted-foreground">₹{userData.nextGoal.current.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">₹{userData.nextGoal.target.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Quick Actions */}
-        <div className="flex flex-wrap gap-4">
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Add Expense
-          </Button>
-          <Button className="flex items-center gap-2" variant="outline">
-            <Target className="h-4 w-4" /> Set New Goal
-          </Button>
-          <Button className="flex items-center gap-2" variant="secondary">
-            <MessageSquare className="h-4 w-4" /> Chat with AI
-          </Button>
+            {/* Financial Insights Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Where Your Money Goes</CardTitle>
+                  <CardDescription>Expense Breakdown</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <ExpenseBreakdownChart data={userData.expenseBreakdown} />
+                  </div>
+                  <p className="text-center mt-4">
+                    You spent {userData.expenseBreakdown.needs}% on needs, {userData.expenseBreakdown.wants}% on wants, and
+                    saved {userData.expenseBreakdown.savings}%.
+                    <span className="font-medium">
+                      {" "}
+                      {getFeedback(
+                        userData.expenseBreakdown.needs,
+                        userData.expenseBreakdown.wants,
+                        userData.expenseBreakdown.savings,
+                      )}
+                    </span>
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Your Monthly Budget & Alerts</CardTitle>
+                  <CardDescription>Budget vs. Actual Spending</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <BudgetComparisonChart data={userData.budgetComparison} />
+                  </div>
+                  <div className="mt-4 p-3 bg-muted rounded-md">
+                    <span className="inline-flex items-center text-sm">
+                      <Lightbulb className="h-4 w-4 mr-1 text-yellow-500" />
+                      {/* Space for AI alert */}
+                      <em>🚨 You're close to overspending on dining this month!</em>
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Suggested Action Plan */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Suggested Action Plan</CardTitle>
+                <CardDescription>Based on your current financial goals</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 border rounded-lg">
+                    <h3 className="font-medium mb-2">Saving Goal</h3>
+                    <p className="text-sm text-muted-foreground">Try setting aside ₹500 more this month!</p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h3 className="font-medium mb-2">Investing Goal</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Consider learning about Mutual Funds. We have a guide for you!
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Educational Section */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Finance Made Easy</CardTitle>
+                <CardDescription>Learn finance in simple steps</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <EducationalCard
+                    title="How to Save Money"
+                    description="A beginner's guide to saving money effectively"
+                    icon="💰"
+                    readTime="3 min read"
+                  />
+                  <EducationalCard
+                    title="What is Investing?"
+                    description="Investing explained in simple terms"
+                    icon="📈"
+                    readTime="3 min read"
+                  />
+                  <EducationalCard
+                    title="How to Avoid Debt Traps"
+                    description="Simple strategies to stay debt-free"
+                    icon="💳"
+                    readTime="3 min read"
+                  />
+                </div>
+
+                <h3 className="font-medium mb-4">Quick 1-Minute Video Tutorials</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <VideoTutorialCard
+                    title="How to Budget Like a Pro"
+                    thumbnail="/placeholder.svg?height=120&width=240"
+                    duration="1:00"
+                  />
+                  <VideoTutorialCard
+                    title="Why Credit Scores Matter"
+                    thumbnail="/placeholder.svg?height=120&width=240"
+                    duration="1:00"
+                  />
+                </div>
+
+                <div className="bg-muted p-4 rounded-lg flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">AI-Powered FAQ Chatbot</h3>
+                    <p className="text-sm text-muted-foreground">Ask me anything about finance!</p>
+                  </div>
+                  <Button variant="outline">
+                    <MessageSquareText className="h-4 w-4 mr-2" />
+                    Ask a Question
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions Panel */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>Easy-to-use shortcuts</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Button className="h-auto py-4 flex flex-col items-center justify-center gap-2">
+                    <PlusCircle className="h-6 w-6" />
+                    <span>Add Expense</span>
+                  </Button>
+                  <Button className="h-auto py-4 flex flex-col items-center justify-center gap-2" variant="outline">
+                    <Target className="h-6 w-6" />
+                    <span>Set a Goal</span>
+                  </Button>
+                  <Button className="h-auto py-4 flex flex-col items-center justify-center gap-2" variant="outline">
+                    <MessageSquareText className="h-6 w-6" />
+                    <span>Ask AI</span>
+                  </Button>
+                  <Button className="h-auto py-4 flex flex-col items-center justify-center gap-2" variant="outline">
+                    <Lightbulb className="h-6 w-6" />
+                    <span>Money-Saving Tip</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </Suspense>
         </div>
-      </main>
+      </div>
     </div>
-  );
-} 
+  )
+}
+

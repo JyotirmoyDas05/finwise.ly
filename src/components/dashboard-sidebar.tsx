@@ -15,17 +15,17 @@ import {
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export function AppSidebar() {
+export function DashboardSidebar() {
   const { theme, setTheme } = useTheme()
   const [activeItem, setActiveItem] = useState("home")
 
   const menuItems = [
-    { id: "home", label: "Home", icon: Home, href: "/" },
-    { id: "finances", label: "My Finances", icon: Wallet, href: "/finances" },
-    { id: "learn", label: "Learn Finance", icon: BookOpen, href: "/learn" },
-    { id: "goals", label: "Set Goals & Track", icon: Target, href: "/goals" },
-    { id: "ask", label: "Ask AI", icon: MessageSquare, href: "/ask" },
-    { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
+    { id: "home", label: "Dashboard", icon: Home, href: "/dashboard" },
+    { id: "finances", label: "My Finances", icon: Wallet, href: "/dashboard/finances" },
+    { id: "learn", label: "Learn Finance", icon: BookOpen, href: "/dashboard/learn" },
+    { id: "goals", label: "Set Goals & Track", icon: Target, href: "/dashboard/goals" },
+    { id: "ask", label: "Ask AI", icon: MessageSquare, href: "/dashboard/ask" },
+    { id: "settings", label: "Settings", icon: Settings, href: "/dashboard/settings" },
   ]
 
   return (
@@ -93,4 +93,3 @@ export function AppSidebar() {
     </Sidebar>
   )
 }
-
