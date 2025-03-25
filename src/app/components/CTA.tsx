@@ -31,10 +31,10 @@ const CTA = () => {
   return (
     <section 
       ref={sectionRef}
-      className="py-24 overflow-hidden bg-gradient-to-br from-blue-500 via-green-500 to-blue-600 dark:from-blue-600 dark:via-green-600 dark:to-blue-700 opacity-0 scale-95 transition-all duration-1000 relative"
+      className="py-24 overflow-hidden bg-gradient-to-br from-blue-500 via-green-500 to-blue-600 dark:from-blue-600 dark:via-green-600 dark:to-blue-700 opacity-0 scale-95 transition-all duration-1000 relative rounded-2xl mx-4"
     >
       {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden rounded-2xl">
         {/* Gradient vector shapes */}
         <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-gradient-to-tr from-white/10 to-transparent rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -54,18 +54,19 @@ const CTA = () => {
           </span>?
         </h2>
         <p className="font-body text-lg text-white/90 font-medium mb-8 max-w-2xl mx-auto leading-relaxed">
-          Join thousands of users who are already improving their finances with <span className="text-green-200 font-semibold">FinWise.ly's AI-powered</span> guidance.
+          Join thousands of users who are already improving their finances with <span className="text-green-200 font-semibold">FinWise.ly&apos;s AI-powered</span> guidance.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link 
             href="/signup" 
-            className="font-sans inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-semibold rounded-md text-blue-600 bg-white hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            className="font-sans inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-semibold rounded-full text-blue-600 bg-white hover:bg-gray-100 transition-all duration-300 shadow-lg
+            hover:shadow-xl hover:-translate-y-0.5"
           >
             Get Started Now
           </Link>
           <Link 
             href="#features" 
-            className="font-sans inline-flex items-center justify-center px-8 py-3 border border-white text-base font-semibold rounded-md text-white bg-transparent hover:bg-white/10 transition-all duration-300 hover:-translate-y-0.5"
+            className="font-sans inline-flex items-center justify-center px-8 py-3 border border-white text-base font-semibold rounded-full text-white bg-transparent hover:bg-white/10 transition-all duration-300 hover:-translate-y-0.5"
           >
             Learn More
           </Link>

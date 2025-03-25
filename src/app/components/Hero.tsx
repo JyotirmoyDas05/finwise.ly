@@ -53,13 +53,13 @@ const Hero = () => {
             <div className="flex flex-wrap gap-4">
               <Link 
                 href="/signup" 
-                className="font-sans inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-semibold rounded-md text-white bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl shadow-primary/20 hover:-translate-y-0.5"
+                className="font-sans inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-semibold rounded-full text-white bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl shadow-primary/20 hover:-translate-y-0.5"
               >
                 Get Started Free
               </Link>
               <Link 
                 href="#features" 
-                className="font-sans inline-flex items-center justify-center px-8 py-3 border border-green text-base font-semibold rounded-md text-green bg-white hover:bg-green-50 dark:hover:bg-dark-800 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                className="font-sans inline-flex items-center justify-center px-8 py-3 border border-green text-base font-semibold rounded-full text-green bg-white hover:bg-green-50 dark:hover:bg-dark-800 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
               >
                 Learn More
               </Link>

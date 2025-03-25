@@ -88,7 +88,7 @@ const Header = () => {
             </Link>
             <Link 
               href="/signup" 
-              className="font-sans px-6 py-2 text-base font-semibold text-white bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              className="font-sans px-6 py-2 text-base font-semibold text-white bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
             >
               Sign Up
             </Link>
