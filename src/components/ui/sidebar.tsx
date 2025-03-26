@@ -67,8 +67,8 @@ const SidebarMenuButton = React.forwardRef<HTMLButtonElement, SidebarMenuButtonP
       <Comp
         ref={ref}
         className={cn(
-          "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-          isActive && "bg-accent",
+          "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+          isActive && "bg-accent text-accent-foreground",
           className
         )}
         title={tooltip}

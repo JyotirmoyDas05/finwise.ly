@@ -1,1 +1,58 @@
- 
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is accessing their own data
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection rules
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // User Profiles collection rules
+    match /userProfiles/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+    }
+
+    // Financial data rules
+    match /users/{userId}/financialData/{document=**} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Goals collection rules
+    match /users/{userId}/goals/{goalId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Transactions collection rules
+    match /users/{userId}/transactions/{transactionId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Budget collection rules
+    match /users/{userId}/budgets/{budgetId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Educational content rules (public read access)
+    match /educationalContent/{document=**} {
+      allow read: if true;
+      allow write: if false; // Only admin can write
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+} 

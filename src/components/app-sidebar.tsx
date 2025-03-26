@@ -35,7 +35,7 @@ export function AppSidebar() {
           <div className="bg-primary p-1 rounded">
             <Wallet className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="font-bold text-xl">FinEasy</span>
+          <span className="font-bold text-xl">FinWise.ly</span>
         </div>
       </SidebarHeader>
 

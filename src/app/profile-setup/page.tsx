@@ -7,15 +7,34 @@ import { db } from '../lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface ProfileData {
   name: string;
-  monthlyIncome: string;
-  monthlyExpenses: string;
-  selectedGoals: string[];
-  selectedCategories: string[];
-  aiPreference: 'detailed' | 'quick';
+  monthlyIncome: number;
+  monthlyExpenses: {
+    housing: number;
+    food: number;
+    transportation: number;
+    utilities: number;
+    healthcare: number;
+    entertainment: number;
+  };
+  expenseBreakdown: {
+    needs: number;
+    wants: number;
+    savings: number;
+  };
+  goals: {
+    name: string;
+    target: number;
+    current: number;
+  }[];
   photoURL: string;
+  preferences: {
+    categories: string[];
+    aiPreference: 'detailed' | 'quick';
+  };
 }
 
 interface FirebaseError {
@@ -23,21 +42,21 @@ interface FirebaseError {
   message: string;
 }
 
-const financialCategories = [
-  { id: 'business', label: 'Business' },
-  { id: 'personal', label: 'Personal Finance' },
-  { id: 'investments', label: 'Investments' },
-  { id: 'crypto', label: 'Cryptocurrency' },
-  { id: 'stocks', label: 'Stocks & Trading' },
-  { id: 'realestate', label: 'Real Estate' },
+const expenseCategories = [
+  { id: 'housing', label: 'Housing', isNeed: true },
+  { id: 'food', label: 'Food', isNeed: true },
+  { id: 'transportation', label: 'Transportation', isNeed: true },
+  { id: 'utilities', label: 'Utilities', isNeed: true },
+  { id: 'healthcare', label: 'Healthcare', isNeed: true },
+  { id: 'entertainment', label: 'Entertainment', isNeed: false },
 ];
 
 const financialGoals = [
-  { id: 'saving', label: 'Saving' },
-  { id: 'investing', label: 'Investing' },
-  { id: 'debt', label: 'Debt Repayment' },
-  { id: 'budgeting', label: 'Budgeting' },
-  { id: 'retirement', label: 'Retirement Planning' },
+  { id: 'emergency_fund', label: 'Emergency Fund', defaultTarget: 50000 },
+  { id: 'savings', label: 'Savings', defaultTarget: 100000 },
+  { id: 'investment', label: 'Investment', defaultTarget: 100000 },
+  { id: 'debt_repayment', label: 'Debt Repayment', defaultTarget: 50000 },
+  { id: 'retirement', label: 'Retirement', defaultTarget: 1000000 },
 ];
 
 export default function ProfileSetup() {
@@ -46,14 +65,35 @@ export default function ProfileSetup() {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string>('');
+  
   const [profileData, setProfileData] = useState<ProfileData>({
     name: '',
-    monthlyIncome: '',
-    monthlyExpenses: '',
-    selectedGoals: [],
-    selectedCategories: [],
-    aiPreference: 'detailed',
+    monthlyIncome: 0,
+    monthlyExpenses: {
+      housing: 0,
+      food: 0,
+      transportation: 0,
+      utilities: 0,
+      healthcare: 0,
+      entertainment: 0,
+    },
+    expenseBreakdown: {
+      needs: 50, // Default 50-30-20 rule
+      wants: 30,
+      savings: 20,
+    },
+    goals: [
+      {
+        name: 'Emergency Fund',
+        target: 50000,
+        current: 0,
+      }
+    ],
     photoURL: '',
+    preferences: {
+      categories: [],
+      aiPreference: 'detailed',
+    },
   });
 
   useEffect(() => {
@@ -84,8 +124,21 @@ export default function ProfileSetup() {
     }
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
+  const calculateExpenseBreakdown = (expenses: ProfileData['monthlyExpenses']) => {
+    const totalExpenses = Object.values(expenses).reduce((sum, expense) => sum + expense, 0);
+    const needsExpenses = expenseCategories
+      .filter(cat => cat.isNeed)
+      .reduce((sum, cat) => sum + expenses[cat.id as keyof typeof expenses], 0);
+    
+    const wantsExpenses = totalExpenses - needsExpenses;
+    const savingsAmount = profileData.monthlyIncome - totalExpenses;
+
+    const total = profileData.monthlyIncome;
+    return {
+      needs: Math.round((needsExpenses / total) * 100),
+      wants: Math.round((wantsExpenses / total) * 100),
+      savings: Math.round((savingsAmount / total) * 100),
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,246 +151,238 @@ export default function ProfileSetup() {
 
     try {
       setLoading(true);
-      await setDoc(doc(db, 'userProfiles', user.uid), {
-        ...profileData,
-        userId: user.uid,
+
+      // Calculate expense breakdown
+      const expenseBreakdown = calculateExpenseBreakdown(profileData.monthlyExpenses);
+      
+      // Prepare budget comparison data
+      const totalExpenses = Object.values(profileData.monthlyExpenses).reduce((sum, expense) => sum + expense, 0);
+      const budgetComparisonData = {
+        last_week: {
+          planned: Math.round(totalExpenses / 4), // Weekly budget
+          actual: Math.round((totalExpenses / 4) * 0.95), // Assuming 95% spent
+        },
+        last_month: {
+          planned: totalExpenses,
+          actual: Math.round(totalExpenses * 0.95),
+        },
+        last_3_months: {
+          planned: totalExpenses * 3,
+          actual: Math.round(totalExpenses * 3 * 0.95),
+        },
+        last_6_months: {
+          planned: totalExpenses * 6,
+          actual: Math.round(totalExpenses * 6 * 0.95),
+        },
+        all_time: {
+          planned: totalExpenses * 12, // Yearly
+          actual: Math.round(totalExpenses * 12 * 0.95),
+        },
+      };
+
+      // Create user document with dashboard structure
+      await setDoc(doc(db, 'users', user.uid), {
+        profile: {
+          name: profileData.name,
+          image: profileData.photoURL || '/placeholder.svg',
+        },
+        finances: {
+          income: {
+            monthly: profileData.monthlyIncome,
+            annual: profileData.monthlyIncome * 12,
+          },
+          expenses: {
+            monthly: totalExpenses,
+            breakdown: profileData.monthlyExpenses,
+            categories: Object.entries(profileData.monthlyExpenses).map(([category, amount]) => ({
+              name: category,
+              budgeted: amount,
+              actual: Math.round(amount * 0.95), // Initial actual spending (95% of budget)
+            })),
+          },
+          expenseBreakdown: expenseBreakdown,
+          goals: profileData.goals,
+        },
+        budgetComparison: budgetComparisonData,
+        settings: {
+          categories: profileData.preferences.categories,
+          aiPreference: profileData.preferences.aiPreference,
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
+
       router.push('/dashboard');
     } catch (error: unknown) {
       console.error('Error saving profile:', error);
-      let errorMessage = 'Failed to save profile. Please try again.';
-      
       const firebaseError = error as FirebaseError;
-      if (firebaseError.code === 'permission-denied') {
-        errorMessage = 'Permission denied. Please make sure you are properly logged in.';
-      } else if (firebaseError.code === 'not-found') {
-        errorMessage = 'Database not found. Please check your Firebase configuration.';
-      } else if (firebaseError.code === 'unauthenticated') {
-        errorMessage = 'Your session has expired. Please log in again.';
-        router.push('/login');
-      }
-      
-      alert(errorMessage);
+      alert(firebaseError.message || 'Failed to save profile');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-background to-background/40 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-[700] font-poppins text-gray-900">Customize Your Profile</h1>
-          <p className="mt-2 text-gray-600">Let&apos;s personalize your financial journey</p>
+          <h1 className="text-4xl font-bold text-foreground">Complete Your Profile</h1>
+          <p className="mt-2 text-muted-foreground">Let's personalize your financial dashboard</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-lg shadow">
-          {/* Profile Picture Upload */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Profile Picture</h2>
-            <div className="flex flex-col items-center space-y-4">
-              <Avatar className="w-32 h-32">
-                {previewImage && <AvatarImage src={previewImage} alt="Profile picture" />}
-                <AvatarFallback>
-                  {profileData.name ? profileData.name.charAt(0).toUpperCase() : 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex items-center space-x-4">
-                <Button
-                  type="button"
-                  onClick={triggerFileInput}
-                  variant="outline"
-                  className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                >
-                  Change Photo
-                </Button>
-                {previewImage && (
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Profile Picture */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center space-y-4">
+                <Avatar className="w-32 h-32 ring-2 ring-primary/20 shadow-lg">
+                  {previewImage && <AvatarImage src={previewImage} alt="Profile" />}
+                  <AvatarFallback>{profileData.name?.charAt(0) || 'U'}</AvatarFallback>
+                </Avatar>
+                <div className="flex gap-4">
                   <Button
                     type="button"
+                    onClick={() => fileInputRef.current?.click()}
                     variant="outline"
-                    className="text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
-                    onClick={() => {
-                      setPreviewImage('');
-                      setProfileData(prev => ({ ...prev, photoURL: '' }));
-                    }}
+                    className="rounded-xl"
                   >
-                    Remove
+                    Change Photo
                   </Button>
-                )}
+                  {previewImage && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      className="rounded-xl"
+                      onClick={() => {
+                        setPreviewImage('');
+                        setProfileData(prev => ({ ...prev, photoURL: '' }));
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
               </div>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                accept="image/*"
-                className="hidden"
-              />
-              <p className="text-sm text-gray-500">
-                Upload a profile picture or use your Google profile photo
-              </p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Profile Information */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Profile Information</h2>
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                value={profileData.name}
-                onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Financial Information */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Financial Information</h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label htmlFor="monthlyIncome" className="block text-sm font-medium text-gray-700">
-                  Monthly Income
-                </label>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 sm:text-sm">$</span>
-                  </div>
+          {/* Basic Information */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold">Basic Information</h2>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Name</label>
                   <input
-                    type="number"
-                    id="monthlyIncome"
-                    value={profileData.monthlyIncome}
-                    onChange={(e) => setProfileData(prev => ({ ...prev, monthlyIncome: e.target.value }))}
-                    className="pl-7 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    type="text"
+                    value={profileData.name}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full rounded-xl border-2 p-2"
+                    required
                   />
                 </div>
-              </div>
-              <div>
-                <label htmlFor="monthlyExpenses" className="block text-sm font-medium text-gray-700">
-                  Monthly Expenses
-                </label>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 sm:text-sm">$</span>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Monthly Income</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2">₹</span>
+                    <input
+                      type="number"
+                      value={profileData.monthlyIncome || ''}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, monthlyIncome: Number(e.target.value) }))}
+                      className="w-full rounded-xl border-2 p-2 pl-8"
+                      required
+                    />
                   </div>
-                  <input
-                    type="number"
-                    id="monthlyExpenses"
-                    value={profileData.monthlyExpenses}
-                    onChange={(e) => setProfileData(prev => ({ ...prev, monthlyExpenses: e.target.value }))}
-                    className="pl-7 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
+
+          {/* Monthly Expenses */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold">Monthly Expenses</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {expenseCategories.map((category) => (
+                    <div key={category.id}>
+                      <label className="block text-sm font-medium mb-1">{category.label}</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2">₹</span>
+                        <input
+                          type="number"
+                          value={profileData.monthlyExpenses[category.id as keyof typeof profileData.monthlyExpenses] || ''}
+                          onChange={(e) => setProfileData(prev => ({
+                            ...prev,
+                            monthlyExpenses: {
+                              ...prev.monthlyExpenses,
+                              [category.id]: Number(e.target.value)
+                            }
+                          }))}
+                          className="w-full rounded-xl border-2 p-2 pl-8"
+                          required
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Financial Goals */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Financial Goals</h2>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {financialGoals.map((goal) => (
-                <label key={goal.id} className="relative flex items-start">
-                  <div className="flex items-center h-5">
-                    <input
-                      type="checkbox"
-                      checked={profileData.selectedGoals.includes(goal.id)}
-                      onChange={(e) => {
-                        const goals = e.target.checked
-                          ? [...profileData.selectedGoals, goal.id]
-                          : profileData.selectedGoals.filter(g => g !== goal.id);
-                        setProfileData(prev => ({ ...prev, selectedGoals: goals }));
-                      }}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                  </div>
-                  <div className="ml-3 text-sm">
-                    <span className="text-gray-700">{goal.label}</span>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Financial Categories */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Preferred Financial Categories</h2>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {financialCategories.map((category) => (
-                <label key={category.id} className="relative flex items-start">
-                  <div className="flex items-center h-5">
-                    <input
-                      type="checkbox"
-                      checked={profileData.selectedCategories.includes(category.id)}
-                      onChange={(e) => {
-                        const categories = e.target.checked
-                          ? [...profileData.selectedCategories, category.id]
-                          : profileData.selectedCategories.filter(c => c !== category.id);
-                        setProfileData(prev => ({ ...prev, selectedCategories: categories }));
-                      }}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                  </div>
-                  <div className="ml-3 text-sm">
-                    <span className="text-gray-700">{category.label}</span>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* AI Preferences */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">AI Assistant Preferences</h2>
-            <div className="space-y-2">
-              <label className="relative flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    type="radio"
-                    checked={profileData.aiPreference === 'detailed'}
-                    onChange={() => setProfileData(prev => ({ ...prev, aiPreference: 'detailed' }))}
-                    className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                  />
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold">Financial Goals</h2>
+                <div className="grid grid-cols-1 gap-4">
+                  {financialGoals.map((goal) => (
+                    <div key={goal.id} className="flex items-center gap-4">
+                      <input
+                        type="checkbox"
+                        id={goal.id}
+                        checked={profileData.goals.some(g => g.name === goal.label)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setProfileData(prev => ({
+                              ...prev,
+                              goals: [...prev.goals, { name: goal.label, target: goal.defaultTarget, current: 0 }]
+                            }));
+                          } else {
+                            setProfileData(prev => ({
+                              ...prev,
+                              goals: prev.goals.filter(g => g.name !== goal.label)
+                            }));
+                          }
+                        }}
+                        className="rounded-lg border-2"
+                      />
+                      <label htmlFor={goal.id} className="flex-1">
+                        <span className="font-medium">{goal.label}</span>
+                        <div className="text-sm text-muted-foreground">Target: ₹{goal.defaultTarget.toLocaleString()}</div>
+                      </label>
+                    </div>
+                  ))}
                 </div>
-                <div className="ml-3 text-sm">
-                  <span className="text-gray-700">Detailed Financial Advice</span>
-                </div>
-              </label>
-              <label className="relative flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    type="radio"
-                    checked={profileData.aiPreference === 'quick'}
-                    onChange={() => setProfileData(prev => ({ ...prev, aiPreference: 'quick' }))}
-                    className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <span className="text-gray-700">Quick Tips and Summaries</span>
-                </div>
-              </label>
-            </div>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Submit Button */}
-          <div className="pt-5">
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative overflow-hidden rounded-full bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 px-14 py-4 text-lg w-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="absolute bottom-0 left-0 h-48 w-full origin-bottom translate-y-full transform overflow-hidden rounded-full bg-white/20 transition-all duration-300 ease-out group-hover:translate-y-14"></span>
-              <span className="font-[500] font-inter text-white text-lg relative z-10">
-                {loading ? 'Saving...' : 'Complete Profile Setup'}
-              </span>
-            </button>
-          </div>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl py-6 text-lg shadow-lg hover:shadow-xl transition-all"
+          >
+            {loading ? 'Saving...' : 'Complete Profile Setup'}
+          </Button>
         </form>
       </div>
     </div>

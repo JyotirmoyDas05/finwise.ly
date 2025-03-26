@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Home, Wallet, BookOpen, Target, MessageSquare, Settings, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import {
@@ -14,10 +14,35 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAuth } from "@/app/context/AuthContext"
+import { db } from "@/app/lib/firebase"
+import { doc, onSnapshot } from "firebase/firestore"
+
+interface UserProfile {
+  profile: {
+    name: string;
+    image: string;
+  };
+}
 
 export function DashboardSidebar() {
   const { theme, setTheme } = useTheme()
+  const { user } = useAuth()
   const [activeItem, setActiveItem] = useState("home")
+  const [userData, setUserData] = useState<UserProfile | null>(null)
+
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    // Subscribe to user document changes
+    const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (doc) => {
+      if (doc.exists()) {
+        setUserData(doc.data() as UserProfile);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user?.uid]);
 
   const menuItems = [
     { id: "home", label: "Dashboard", icon: Home, href: "/dashboard" },
@@ -32,10 +57,10 @@ export function DashboardSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b p-4">
         <div className="flex items-center space-x-2">
-          <div className="bg-primary p-1 rounded">
+          <div className="bg-primary p-1 rounded-xl">
             <Wallet className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="font-bold text-xl">FinEasy</span>
+          <span className="font-bold text-xl">FinWise.ly</span>
         </div>
       </SidebarHeader>
 
@@ -49,7 +74,7 @@ export function DashboardSidebar() {
                 onClick={() => setActiveItem(item.id)}
                 tooltip={item.label}
               >
-                <a href={item.href}>
+                <a href={item.href} className="border-2 border-transparent hover:border-accent">
                   <item.icon className="h-5 w-5" />
                   <span>{item.label}</span>
                 </a>
@@ -63,11 +88,11 @@ export function DashboardSidebar() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <Avatar className="h-8 w-8">
-              <AvatarImage src="/placeholder.svg?height=32&width=32" />
-              <AvatarFallback>R</AvatarFallback>
+              <AvatarImage src={userData?.profile.image || "/placeholder.svg"} alt={userData?.profile.name} />
+              <AvatarFallback>{userData?.profile.name?.charAt(0) || 'U'}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium">Rahul</p>
+              <p className="text-sm font-medium">{userData?.profile.name || 'User'}</p>
               <p className="text-xs text-muted-foreground">Free Plan</p>
             </div>
           </div>
@@ -76,6 +101,7 @@ export function DashboardSidebar() {
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             aria-label="Toggle theme"
+            className="rounded-xl hover:bg-accent"
           >
             <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -84,7 +110,7 @@ export function DashboardSidebar() {
         <div className="text-xs text-center text-muted-foreground">
           <p>
             Need help?{" "}
-            <a href="#" className="text-primary underline">
+            <a href="#" className="text-primary underline hover:text-primary/90 rounded-lg">
               Contact Support
             </a>
           </p>
