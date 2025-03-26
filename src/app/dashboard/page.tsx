@@ -139,7 +139,7 @@ export default function Dashboard() {
                     <CardTitle className="text-2xl font-medium text-foreground/90">
                       Welcome, {userData.profile.name}!
                     </CardTitle>
-                    <CardDescription className="text-base">Let's Make Finance Simple Today!</CardDescription>
+                    <CardDescription className="text-base">Let&apos;s Make Finance Simple Today!</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -147,7 +147,7 @@ export default function Dashboard() {
                 <div className="text-sm text-muted-foreground mb-6">
                   <span className="inline-flex items-center bg-primary/5 px-3 py-1 rounded-xl shadow-sm">
                     <Lightbulb className="h-4 w-4 mr-2 text-primary" />
-                    <em>Tip: Try saving 20% of your income. It's easier than you think!</em>
+                    <em>Tip: Try saving 20% of your income. It&apos;s easier than you think!</em>
                   </span>
                 </div>
 
@@ -314,6 +314,7 @@ export default function Dashboard() {
                   <Button 
                     variant="outline" 
                     className="rounded-xl border-2 transition-colors hover:bg-primary hover:text-primary-foreground"
+                    onClick={() => router.push('/dashboard/ask')}
                   >
                     <MessageSquareText className="h-4 w-4 mr-2" />
                     Ask a Question
@@ -347,6 +348,7 @@ export default function Dashboard() {
                   <Button 
                     className="h-auto py-4 flex flex-col items-center justify-center gap-2 rounded-xl border-2 shadow-lg hover:shadow-xl hover:translate-y-[-2px] transition-all bg-gradient-to-br from-background to-background/40"
                     variant="outline"
+                    onClick={() => router.push('/dashboard/ask')}
                   >
                     <MessageSquareText className="h-6 w-6 drop-shadow" />
                     <span>Ask AI</span>

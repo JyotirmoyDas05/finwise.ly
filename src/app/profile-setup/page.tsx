@@ -227,7 +227,7 @@ export default function ProfileSetup() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-foreground">Complete Your Profile</h1>
-          <p className="mt-2 text-muted-foreground">Let's personalize your financial dashboard</p>
+          <p className="mt-2 text-muted-foreground">Let&apos;s personalize your financial dashboard</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">

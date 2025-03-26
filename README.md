@@ -1,125 +1,146 @@
-# FinWise.ly
+# FinWise.ly - Your Personal Finance Management Platform
 
-A modern financial management platform powered by AI to help users make better financial decisions.
-
-## Project Overview
-
-FinWise.ly is a web application that provides AI-powered financial guidance, expense tracking, and investment insights. The platform aims to make financial management accessible and intuitive for everyone.
+FinWise.ly is a modern, AI-powered personal finance management platform that helps users track their expenses, set financial goals, and learn about personal finance through interactive content and AI assistance.
 
 ## Features
 
-- Smart Budgeting with AI-powered recommendations
-- Investment Insights and Analysis
-- Savings Goals Tracking
-- Secure Data Management
-- Modern, Responsive UI
-- Dark/Light Theme Support (In Progress)
+- 📊 Dashboard for financial overview
+- 💰 Expense tracking and management
+- 🎯 Goal setting and progress tracking
+- 📚 Interactive financial learning resources
+- 🤖 AI-powered financial advice and assistance
+- 🌓 Dark/Light mode support
+- 🔒 Secure authentication
+- 📱 Responsive design
 
 ## Tech Stack
 
-- Next.js 14 (App Router)
-- TypeScript
-- Tailwind CSS
-- Lucide Icons
-- Next.js Font Optimization
+### Frontend
+- **Framework**: Next.js 15
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: 
+  - Radix UI (for accessible components)
+  - Lucide React (for icons)
+  - Framer Motion (for animations)
+- **State Management**: React Hooks
+- **Charts**: Recharts
+- **Markdown Support**: React Markdown with Remark GFM
 
-## Getting Started
+### Backend
+- **Framework**: Next.js API Routes
+- **Database**: Firebase Firestore
+- **Authentication**: NextAuth.js with Firebase
+- **AI Integration**: Google Generative AI
+- **File Storage**: Firebase Storage
 
-First, run the development server:
+### APIs Used
+- Google Generative AI API for financial advice
+- Firebase Authentication API
+- Firebase Firestore API
+- Firebase Storage API
 
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+- Node.js (v18 or higher)
+- npm or yarn
+- Firebase account and project setup
+- Google AI API key
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+GOOGLE_AI_API_KEY=
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=http://localhost:3000
+```
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/finwise-ly.git
+cd finwise-ly
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Set up your environment variables as described above.
+
+4. Run the development server:
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Current Progress
+## Building for Production
 
-- ✅ Landing Page UI Implementation
-  - Modern, responsive hero section
-  - Feature showcase with animations
-  - How it works section
-  - Call-to-action components
-- ✅ Responsive Design
-  - Mobile-first approach
-  - Smooth animations and transitions
-  - Grid and flex layouts
-- ✅ Component Architecture
-  - Reusable UI components
-  - Modular design patterns
-  - Lucide icons integration
-- ✅ Basic Routing
-  - Next.js 14 App Router implementation
-  - Smooth page transitions
-- ✅ Authentication System
-  - User authentication context
-  - Protected routes
-- ✅ Dashboard Implementation
-  - Financial overview cards
-  - Expense distribution charts
-  - Income & expense trends
-  - AI-powered insights section
-  - Quick action buttons
-- ✅ Theme Support
-  - Dark/Light mode implementation
-  - Gradient backgrounds
-  - Modern UI elements
-- ⏳ AI Integration
-  - Basic AI insights implemented
-  - Advanced features in development
+To create a production build:
 
-## Features (Updated)
+```bash
+npm run build
+# or
+yarn build
+```
 
-- Smart Budgeting with AI-powered recommendations
-  - Expense tracking and categorization
-  - Personalized budget suggestions
-  - Spending pattern analysis
-- Investment Insights and Analysis
-  - Real-time financial data visualization
-  - Trend analysis and predictions
-  - Risk assessment tools
-- Savings Goals Tracking
-  - Visual progress indicators
-  - AI-powered goal recommendations
-  - Milestone tracking
-- Secure Data Management
-  - End-to-end encryption
-  - Bank-level security measures
-- Modern, Responsive UI
-  - Intuitive dashboard interface
-  - Interactive charts and graphs
-  - Mobile-optimized design
-- Dark/Light Theme Support
-  - System preference detection
-  - Smooth theme transitions
-  - Consistent styling across modes
+To start the production server:
 
-## Known Issues
+```bash
+npm start
+# or
+yarn start
+```
 
-1. **Theme Toggle (In Progress)**
-   - Dark/Light mode toggle functionality temporarily disabled
-   - Background theme transition needs refinement
-   - Color scheme consistency issues between modes
-   - Current Status: Under development, will be re-enabled in future updates
+## Project Structure
 
-## Learn More
-
-To learn more about the technologies used in this project:
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs)
-
-## Deployment
-
-The application can be deployed using [Vercel Platform](https://vercel.com) for optimal performance and reliability.
+```
+finwise-ly/
+├── src/
+│   ├── app/              # Next.js app directory
+│   ├── components/       # Reusable UI components
+│   ├── lib/             # Utility functions and configurations
+│   └── styles/          # Global styles
+├── public/              # Static assets
+├── .env.local          # Environment variables
+└── package.json        # Project dependencies
+```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support, email support@finwise.ly or join our Slack channel.
+
+## Acknowledgments
+
+- Next.js team for the amazing framework
+- Firebase team for the backend services
+- Google AI team for the generative AI capabilities
+- All contributors who have helped shape this project

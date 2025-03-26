@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Home, Wallet, BookOpen, Target, MessageSquare, Settings, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+import { useRouter, usePathname } from "next/navigation"
 import {
   Sidebar,
   SidebarContent,
@@ -28,7 +29,8 @@ interface UserProfile {
 export function DashboardSidebar() {
   const { theme, setTheme } = useTheme()
   const { user } = useAuth()
-  const [activeItem, setActiveItem] = useState("home")
+  const router = useRouter()
+  const pathname = usePathname()
   const [userData, setUserData] = useState<UserProfile | null>(null)
 
   useEffect(() => {
@@ -53,38 +55,42 @@ export function DashboardSidebar() {
     { id: "settings", label: "Settings", icon: Settings, href: "/dashboard/settings" },
   ]
 
+  const handleMenuClick = (href: string) => {
+    router.push(href);
+  };
+
+  // Determine active item based on current pathname
+  const getActiveItem = () => {
+    const currentPath = pathname || "/dashboard";
+    const item = menuItems.find(item => currentPath === item.href);
+    return item?.id || "home";
+  };
+
   return (
     <Sidebar>
-      <SidebarHeader className="border-b p-4">
+      <SidebarHeader className="p-4 border-b">
         <div className="flex items-center space-x-2">
-          <div className="bg-primary p-1 rounded-xl">
-            <Wallet className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <span className="font-bold text-xl">FinWise.ly</span>
+          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white font-normal text-lg">F</div>
+          <h2 className="font-semibold text-lg">FinWise.ly</h2>
         </div>
       </SidebarHeader>
-
-      <SidebarContent className="py-4">
+      <SidebarContent>
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.id}>
               <SidebarMenuButton
-                asChild
-                isActive={activeItem === item.id}
-                onClick={() => setActiveItem(item.id)}
-                tooltip={item.label}
+                onClick={() => handleMenuClick(item.href)}
+                isActive={getActiveItem() === item.id}
+                className="w-full"
               >
-                <a href={item.href} className="border-2 border-transparent hover:border-accent">
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.label}</span>
-                </a>
+                <item.icon className="h-5 w-5" />
+                {item.label}
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarContent>
-
-      <SidebarFooter className="border-t p-4">
+      <SidebarFooter className="p-4 border-t">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <Avatar className="h-8 w-8">

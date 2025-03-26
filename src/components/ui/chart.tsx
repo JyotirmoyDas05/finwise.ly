@@ -13,7 +13,7 @@ import {
   const Card = forwardRef<React.ElementRef<typeof ShadCard>, React.ComponentPropsWithoutRef<typeof ShadCard>>(
     ({ className, ...props }, ref) => <ShadCard {...props} ref={ref} className={cn("border shadow-sm", className)} />,
   )
-  Card.displayName = ShadCard.displayName
+  Card.displayName = (ShadCard as any).displayName
   
   const CardHeader = forwardRef<
     React.ElementRef<typeof ShadCardHeader>,
@@ -21,7 +21,7 @@ import {
   >(({ className, ...props }, ref) => (
     <ShadCardHeader {...props} ref={ref} className={cn("flex flex-col space-y-1.5 p-6", className)} />
   ))
-  CardHeader.displayName = ShadCardHeader.displayName
+  CardHeader.displayName = (ShadCardHeader as any).displayName
   
   const CardTitle = forwardRef<
     React.ElementRef<typeof ShadCardTitle>,
@@ -29,7 +29,7 @@ import {
   >(({ className, ...props }, ref) => (
     <ShadCardTitle {...props} ref={ref} className={cn("text-lg font-semibold leading-none tracking-tight", className)} />
   ))
-  CardTitle.displayName = ShadCardTitle.displayName
+  CardTitle.displayName = (ShadCardTitle as any).displayName
   
   const CardDescription = forwardRef<
     React.ElementRef<typeof ShadCardDescription>,
@@ -37,13 +37,13 @@ import {
   >(({ className, ...props }, ref) => (
     <ShadCardDescription {...props} ref={ref} className={cn("text-sm text-muted-foreground", className)} />
   ))
-  CardDescription.displayName = ShadCardDescription.displayName
+  CardDescription.displayName = (ShadCardDescription as any).displayName
   
   const CardContent = forwardRef<
     React.ElementRef<typeof ShadCardContent>,
     React.ComponentPropsWithoutRef<typeof ShadCardContent>
   >(({ className, ...props }, ref) => <ShadCardContent className={cn("p-6 pt-0", className)} {...props} ref={ref} />)
-  CardContent.displayName = ShadCardContent.displayName
+  CardContent.displayName = (ShadCardContent as any).displayName
   
   const CardFooter = forwardRef<
     React.ElementRef<typeof ShadCardFooter>,
@@ -51,7 +51,7 @@ import {
   >(({ className, ...props }, ref) => (
     <ShadCardFooter {...props} ref={ref} className={cn("flex items-center p-6 pt-0", className)} />
   ))
-  CardFooter.displayName = ShadCardFooter.displayName
+  CardFooter.displayName = (ShadCardFooter as any).displayName
   
   export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
   
