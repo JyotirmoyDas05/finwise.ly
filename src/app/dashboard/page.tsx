@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { PlusCircle, Target, MessageSquareText, Lightbulb } from "lucide-react"
+import { PlusCircle, Target, MessageSquareText, Lightbulb, LogOut } from "lucide-react"
 import { ExpenseBreakdownChart } from "@/components/expense-breakdown-chart"
 import { BudgetComparisonChart } from "@/components/budget-comparison-chart"
 import { EducationalCard } from "@/components/educational-card"
@@ -60,7 +60,7 @@ interface UserData {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -130,17 +130,35 @@ export default function Dashboard() {
             {/* Welcome Section */}
             <Card className="mb-8 border-0 shadow-lg bg-gradient-to-b from-background to-background/40 backdrop-blur-sm">
               <CardHeader className="pb-2">
-                <div className="flex items-center space-x-4">
-                  <Avatar className="h-12 w-12 ring-2 ring-primary/20 shadow-lg">
-                    <AvatarImage src={userData.profile.image} alt={userData.profile.name} />
-                    <AvatarFallback className="bg-primary/5">{userData.profile.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className="text-2xl font-medium text-foreground/90">
-                      Welcome, {userData.profile.name}!
-                    </CardTitle>
-                    <CardDescription className="text-base">Let&apos;s Make Finance Simple Today!</CardDescription>
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center space-x-4">
+                    <Avatar className="h-12 w-12 ring-2 ring-primary/20 shadow-lg">
+                      <AvatarImage src={userData.profile.image} alt={userData.profile.name} />
+                      <AvatarFallback className="bg-primary/5">{userData.profile.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle className="text-2xl font-medium text-foreground/90">
+                        Welcome, {userData.profile.name}!
+                      </CardTitle>
+                      <CardDescription className="text-base">Let&apos;s Make Finance Simple Today!</CardDescription>
+                    </div>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="default"
+                    className="px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/50 hover:bg-primary hover:text-white backdrop-blur-sm border-2 border-primary/20 hover:border-primary rounded-xl font-medium"
+                    onClick={async () => {
+                      try {
+                        await logout();
+                        router.push('/login');
+                      } catch (error) {
+                        console.error('Failed to log out:', error);
+                      }
+                    }}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>

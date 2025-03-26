@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { LogOut } from "lucide-react";
 
 interface UserSettings {
   profile: {
@@ -32,7 +33,7 @@ interface UserSettings {
 }
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -408,9 +409,25 @@ export default function SettingsPage() {
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="w-full"
+            className="w-full mb-4 px-6 py-6 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : "Save Changes"}
+          </Button>
+
+          <Button
+            onClick={async () => {
+              try {
+                await logout();
+                router.push('/login');
+              } catch (error) {
+                toast.error('Failed to log out');
+              }
+            }}
+            variant="outline"
+            className="w-full px-6 py-6 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/50 hover:bg-destructive hover:text-white backdrop-blur-sm border-2 border-destructive/20 hover:border-destructive rounded-xl font-medium"
+          >
+            <LogOut className="h-5 w-5 mr-2" />
+            Logout
           </Button>
         </div>
       </div>

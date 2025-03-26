@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Home, Wallet, BookOpen, Target, MessageSquare, Settings, Moon, Sun } from "lucide-react"
+import { Home, Wallet, BookOpen, Target, MessageSquare, Settings, Moon, Sun, LogOut } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useRouter, usePathname } from "next/navigation"
 import {
@@ -28,7 +28,7 @@ interface UserProfile {
 
 export function DashboardSidebar() {
   const { theme, setTheme } = useTheme()
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
   const [userData, setUserData] = useState<UserProfile | null>(null)
@@ -102,16 +102,34 @@ export function DashboardSidebar() {
               <p className="text-xs text-muted-foreground">Free Plan</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            aria-label="Toggle theme"
-            className="rounded-xl hover:bg-accent"
-          >
-            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-label="Toggle theme"
+              className="rounded-xl hover:bg-accent"
+            >
+              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={async () => {
+                try {
+                  await logout();
+                  router.push('/login');
+                } catch (error) {
+                  console.error('Failed to log out:', error);
+                }
+              }}
+              aria-label="Logout"
+              className="rounded-xl hover:bg-accent"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
         <div className="text-xs text-center text-muted-foreground">
           <p>
