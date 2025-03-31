@@ -44,6 +44,44 @@ service cloud.firestore {
       allow read, write: if isOwner(userId);
     }
 
+    // Top-level budgets collection rules
+    match /budgets/{budgetId} {
+      // Allow read if authenticated and either:
+      // 1. It's a new document being created
+      // 2. The user owns the existing document
+      allow read: if isAuthenticated() && (
+        resource == null || 
+        resource.data.userId == request.auth.uid
+      );
+      
+      // Allow create if authenticated and setting themselves as owner
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // Allow update/delete if authenticated and they own the document
+      allow update, delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+
+    // Top-level transactions collection rules
+    match /transactions/{transactionId} {
+      // Allow read if authenticated and either:
+      // 1. It's a new document being created
+      // 2. The user owns the existing document
+      allow read: if isAuthenticated() && (
+        resource == null || 
+        resource.data.userId == request.auth.uid
+      );
+      
+      // Allow create if authenticated and setting themselves as owner
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // Allow update/delete if authenticated and they own the document
+      allow update, delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+
     // Educational content rules (public read access)
     match /educationalContent/{document=**} {
       allow read: if true;

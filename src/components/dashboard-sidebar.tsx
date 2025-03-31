@@ -48,7 +48,7 @@ export function DashboardSidebar() {
 
   const menuItems = [
     { id: "home", label: "Dashboard", icon: Home, href: "/dashboard" },
-    { id: "finances", label: "My Finances", icon: Wallet, href: "/dashboard/finances" },
+    { id: "finances", label: "My Finances", icon: Wallet, href: "/dashboard/finance" },
     { id: "learn", label: "Learn Finance", icon: BookOpen, href: "/dashboard/learn" },
     { id: "goals", label: "Set Goals & Track", icon: Target, href: "/dashboard/goals" },
     { id: "ask", label: "Ask AI", icon: MessageSquare, href: "/dashboard/ask" },
@@ -67,51 +67,66 @@ export function DashboardSidebar() {
   };
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4 border-b">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white font-normal text-lg">F</div>
-          <h2 className="font-semibold text-lg">FinWise.ly</h2>
+    <Sidebar className="bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 w-64 min-h-screen">
+      <SidebarHeader className="p-6">
+        <div className="flex items-center gap-3">
+          <div className="w-19 h-18 flex items-center justify-center">
+            <img 
+              src="/FinWise.ly_logo.svg" 
+              alt="FinWise.ly" 
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+            FinWise.ly
+          </h2>
         </div>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="px-4">
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.id}>
               <SidebarMenuButton
                 onClick={() => handleMenuClick(item.href)}
                 isActive={getActiveItem() === item.id}
-                className="w-full"
+                className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 ${
+                  getActiveItem() === item.id
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
+                    : ''
+                }`}
               >
-                <item.icon className="h-5 w-5" />
-                {item.label}
+                <item.icon className={`h-6 w-6 ${
+                  getActiveItem() === item.id
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-gray-500 dark:text-gray-400'
+                }`} />
+                <span className="text-base font-medium">{item.label}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="p-4 border-t">
+      <SidebarFooter className="mt-auto p-4 border-t border-gray-200 dark:border-gray-800">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <Avatar className="h-8 w-8">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-blue-500 dark:ring-blue-400">
               <AvatarImage src={userData?.profile.image || "/placeholder.svg"} alt={userData?.profile.name} />
-              <AvatarFallback>{userData?.profile.name?.charAt(0) || 'U'}</AvatarFallback>
+              <AvatarFallback className="bg-blue-100 text-blue-600">{userData?.profile.name?.charAt(0) || 'U'}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium">{userData?.profile.name || 'User'}</p>
-              <p className="text-xs text-muted-foreground">Free Plan</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{userData?.profile.name || 'User'}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Free Plan</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label="Toggle theme"
-              className="rounded-xl hover:bg-accent"
+              className="rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-gray-600 dark:text-gray-400" />
+              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-gray-600 dark:text-gray-400" />
             </Button>
             <Button
               variant="ghost"
@@ -124,17 +139,16 @@ export function DashboardSidebar() {
                   console.error('Failed to log out:', error);
                 }
               }}
-              aria-label="Logout"
-              className="rounded-xl hover:bg-accent"
+              className="rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <LogOut className="h-5 w-5" />
+              <LogOut className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             </Button>
           </div>
         </div>
-        <div className="text-xs text-center text-muted-foreground">
+        <div className="text-xs text-center text-gray-500 dark:text-gray-400">
           <p>
             Need help?{" "}
-            <a href="#" className="text-primary underline hover:text-primary/90 rounded-lg">
+            <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
               Contact Support
             </a>
           </p>
