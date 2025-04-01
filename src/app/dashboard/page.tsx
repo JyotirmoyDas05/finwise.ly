@@ -242,6 +242,65 @@ export default function Dashboard() {
     return "Let's improve your savings!"
   }
 
+  const generateActionSuggestions = (goals: Goal[], finances: UserData['finances']) => {
+    const suggestions = [];
+
+    // Analyze savings rate
+    const savingsRate = ((finances.monthlyIncome - finances.monthlyExpenses) / finances.monthlyIncome) * 100;
+    if (savingsRate < 20) {
+      suggestions.push({
+        title: "Increase Your Savings",
+        description: `Your current savings rate is ${Math.round(savingsRate)}%. Try to save at least 20% of your income by reducing expenses or increasing income.`
+      });
+    }
+
+    // Analyze high-priority goals
+    const highPriorityGoals = goals.filter(g => g.priority === "high");
+    if (highPriorityGoals.length > 0) {
+      const mostUrgentGoal = highPriorityGoals.reduce((a, b) => 
+        new Date(a.deadline) < new Date(b.deadline) ? a : b
+      );
+      suggestions.push({
+        title: "Focus on High Priority Goal",
+        description: `Prioritize your ${mostUrgentGoal.title} goal. You have ${Math.round((mostUrgentGoal.currentAmount / mostUrgentGoal.amount) * 100)}% progress.`
+      });
+    }
+
+    // Analyze budget utilization
+    const totalBudget = finances.budgets.reduce((sum, b) => sum + b.amount, 0);
+    const totalSpent = finances.budgets.reduce((sum, b) => sum + b.spent, 0);
+    const budgetUtilization = (totalSpent / totalBudget) * 100;
+    
+    if (budgetUtilization > 90) {
+      suggestions.push({
+        title: "Budget Warning",
+        description: "You're close to exceeding your monthly budget. Consider reviewing your expenses and cutting back on non-essential items."
+      });
+    }
+
+    // Analyze emergency fund
+    const emergencyFundGoal = goals.find(g => g.type === "emergency");
+    if (emergencyFundGoal) {
+      const emergencyProgress = (emergencyFundGoal.currentAmount / emergencyFundGoal.amount) * 100;
+      if (emergencyProgress < 50) {
+        suggestions.push({
+          title: "Build Emergency Fund",
+          description: `Your emergency fund is at ${Math.round(emergencyProgress)}%. Aim to build it up to cover 3-6 months of expenses.`
+        });
+      }
+    }
+
+    // If no specific suggestions, provide a general one
+    if (suggestions.length === 0) {
+      suggestions.push({
+        title: "Stay on Track",
+        description: "You're doing well! Keep maintaining your current financial habits and continue working towards your goals."
+      });
+    }
+
+    return suggestions;
+  };
+
   return (
     <div className="flex h-screen bg-background">
       <DashboardSidebar />
@@ -466,16 +525,12 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4">
-                    <div className="p-4 border rounded-lg bg-card">
-                      <h3 className="font-medium mb-2">Saving Goal</h3>
-                      <p className="text-sm text-muted-foreground">Try setting aside ₹500 more this month!</p>
-                    </div>
-                    <div className="p-4 border rounded-lg bg-card">
-                      <h3 className="font-medium mb-2">Investing Goal</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Consider learning about Mutual Funds. We have a guide for you!
-                      </p>
-                    </div>
+                    {generateActionSuggestions(goals, userData.finances).map((suggestion, index) => (
+                      <div key={index} className="p-4 border rounded-lg bg-card">
+                        <h3 className="font-medium mb-2">{suggestion.title}</h3>
+                        <p className="text-sm text-muted-foreground">{suggestion.description}</p>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

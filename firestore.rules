@@ -20,16 +20,30 @@ service cloud.firestore {
       match /goals/{goalId} {
         allow read, write: if isOwner(userId);
       }
+
+      // Rules for learning progress collection
+      match /learning_progress/{progressId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Rules for financial data collection
+      match /financialData/{document=**} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // Rules for budgets collection
     match /budgets/{budgetId} {
-      allow read, write: if isOwner(resource.data.userId);
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
     }
 
     // Rules for transactions collection
     match /transactions/{transactionId} {
-      allow read, write: if isOwner(resource.data.userId);
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
     }
 
     // User Profiles collection rules
@@ -48,6 +62,21 @@ service cloud.firestore {
     match /educationalContent/{document=**} {
       allow read: if true;
       allow write: if false; // Only admin can write
+    }
+
+    // Chat messages rules
+    match /chat/{userId}/messages/{messageId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // User settings rules
+    match /users/{userId}/settings/{settingId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Budget comparison rules
+    match /users/{userId}/budgetComparison/{document=**} {
+      allow read, write: if isOwner(userId);
     }
 
     // Default deny
