@@ -7,14 +7,29 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Helper function to check if user is accessing their own data
+    // Helper function to check if user owns the document
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Users collection rules
+    // Rules for users collection
     match /users/{userId} {
       allow read, write: if isOwner(userId);
+      
+      // Rules for nested goals collection
+      match /goals/{goalId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Rules for budgets collection
+    match /budgets/{budgetId} {
+      allow read, write: if isOwner(resource.data.userId);
+    }
+
+    // Rules for transactions collection
+    match /transactions/{transactionId} {
+      allow read, write: if isOwner(resource.data.userId);
     }
 
     // User Profiles collection rules
@@ -27,59 +42,6 @@ service cloud.firestore {
     // Financial data rules
     match /users/{userId}/financialData/{document=**} {
       allow read, write: if isOwner(userId);
-    }
-
-    // Goals collection rules
-    match /users/{userId}/goals/{goalId} {
-      allow read, write: if isOwner(userId);
-    }
-
-    // Transactions collection rules
-    match /users/{userId}/transactions/{transactionId} {
-      allow read, write: if isOwner(userId);
-    }
-
-    // Budget collection rules
-    match /users/{userId}/budgets/{budgetId} {
-      allow read, write: if isOwner(userId);
-    }
-
-    // Top-level budgets collection rules
-    match /budgets/{budgetId} {
-      // Allow read if authenticated and either:
-      // 1. It's a new document being created
-      // 2. The user owns the existing document
-      allow read: if isAuthenticated() && (
-        resource == null || 
-        resource.data.userId == request.auth.uid
-      );
-      
-      // Allow create if authenticated and setting themselves as owner
-      allow create: if isAuthenticated() && 
-        request.resource.data.userId == request.auth.uid;
-      
-      // Allow update/delete if authenticated and they own the document
-      allow update, delete: if isAuthenticated() && 
-        resource.data.userId == request.auth.uid;
-    }
-
-    // Top-level transactions collection rules
-    match /transactions/{transactionId} {
-      // Allow read if authenticated and either:
-      // 1. It's a new document being created
-      // 2. The user owns the existing document
-      allow read: if isAuthenticated() && (
-        resource == null || 
-        resource.data.userId == request.auth.uid
-      );
-      
-      // Allow create if authenticated and setting themselves as owner
-      allow create: if isAuthenticated() && 
-        request.resource.data.userId == request.auth.uid;
-      
-      // Allow update/delete if authenticated and they own the document
-      allow update, delete: if isAuthenticated() && 
-        resource.data.userId == request.auth.uid;
     }
 
     // Educational content rules (public read access)

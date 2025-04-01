@@ -27,6 +27,7 @@ interface Budget {
   spent: number;
   emoji: string;
   category: string;
+  classification: "need" | "want";
 }
 
 interface Transaction {
@@ -64,6 +65,7 @@ export default function FinancePage() {
     amount: 0,
     emoji: "💰",
     category: "",
+    classification: "need" as "need" | "want",
   });
   const [newTransaction, setNewTransaction] = useState({
     type: "expense" as "income" | "expense",
@@ -191,7 +193,7 @@ export default function FinancePage() {
       });
 
       setBudgets(prev => [...prev, { id: budgetRef.id, ...newBudget, spent: 0 }]);
-      setNewBudget({ name: "", amount: 0, emoji: "💰", category: "" });
+      setNewBudget({ name: "", amount: 0, emoji: "💰", category: "", classification: "need" });
       setShowBudgetDialog(false);
       toast.success("Budget added successfully");
     } catch (error) {
@@ -300,22 +302,24 @@ export default function FinancePage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-[#f8fafc] dark:bg-gray-900">
       <DashboardSidebar />
-      <div className="flex-1 p-8 overflow-y-auto">
-        <h1 className="text-2xl font-bold mb-6">My Finance</h1>
+      <div className="flex-1 p-8 overflow-y-auto bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50">
+        <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">My Finance</h1>
 
         {/* Financial Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Net Worth</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₹{overview.netWorth.toLocaleString()}</div>
+              <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                ₹{overview.netWorth.toLocaleString()}
+              </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
               <StyledDialog 
@@ -324,7 +328,7 @@ export default function FinancePage() {
                 title="Add Income"
                 trigger={
                   <DialogTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="hover:bg-blue-50 dark:hover:bg-blue-900/20">
                       <Plus className="h-4 w-4" />
                     </Button>
                   </DialogTrigger>
@@ -341,7 +345,7 @@ export default function FinancePage() {
                         amount: parseFloat(e.target.value) || 0,
                         type: "income"
                       }))}
-                      className="bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 rounded-xl"
+                      className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-gray-200/50 dark:border-gray-700/50 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -352,7 +356,7 @@ export default function FinancePage() {
                         ...prev,
                         description: e.target.value
                       }))}
-                      className="bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 rounded-xl"
+                      className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-gray-200/50 dark:border-gray-700/50 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500/20"
                     />
                   </div>
                   <Button 
@@ -360,7 +364,7 @@ export default function FinancePage() {
                       handleAddTransaction();
                       setShowIncomeDialog(false);
                     }}
-                    className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white rounded-full"
+                    className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl w-full"
                   >
                     Add Income
                   </Button>
@@ -371,7 +375,7 @@ export default function FinancePage() {
               <div className="text-2xl font-bold">₹{overview.monthlyIncome.toLocaleString()}</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Monthly Expenses</CardTitle>
             </CardHeader>
@@ -379,7 +383,7 @@ export default function FinancePage() {
               <div className="text-2xl font-bold">₹{overview.monthlyExpenses.toLocaleString()}</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Financial Health Score</CardTitle>
               <AlertCircle className="h-4 w-4 text-muted-foreground" />
@@ -392,7 +396,7 @@ export default function FinancePage() {
         </div>
 
         {/* Monthly Budget Tracking */}
-        <Card className="mb-6">
+        <Card className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Monthly Budget Tracking</CardTitle>
             <StyledDialog 
@@ -401,7 +405,7 @@ export default function FinancePage() {
               title="Add New Budget Category"
               trigger={
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white rounded-full">
+                  <Button className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                     Add New Category
                   </Button>
                 </DialogTrigger>
@@ -450,6 +454,21 @@ export default function FinancePage() {
                       </div>
                     )}
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Classification</Label>
+                  <Select
+                    value={newBudget.classification}
+                    onValueChange={(value) => setNewBudget({ ...newBudget, classification: value as "need" | "want" })}
+                  >
+                    <SelectTrigger className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-gray-200/50 dark:border-gray-700/50 rounded-xl shadow-sm">
+                      <SelectValue placeholder="Select classification" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-gray-200/50 dark:border-gray-700/50 rounded-xl shadow-lg">
+                      <SelectItem value="need">Need</SelectItem>
+                      <SelectItem value="want">Want</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Budget Amount</Label>
@@ -505,7 +524,7 @@ export default function FinancePage() {
                   </div>
                   <Progress 
                     value={(budget.spent / budget.amount) * 100} 
-                    className={`h-2 ${getBudgetStatusColor(budget.spent, budget.amount)}`}
+                    className={`h-2 ${getBudgetStatusColor(budget.spent, budget.amount)} shadow-sm rounded-full`}
                   />
                 </div>
               ))}
@@ -514,7 +533,7 @@ export default function FinancePage() {
         </Card>
 
         {/* Transaction Overview */}
-        <Card>
+        <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Transaction Overview</CardTitle>
             <StyledDialog 
@@ -523,7 +542,7 @@ export default function FinancePage() {
               title="Add New Transaction"
               trigger={
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white rounded-full">
+                  <Button className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                     Add New Transaction
                   </Button>
                 </DialogTrigger>
@@ -550,7 +569,7 @@ export default function FinancePage() {
                   <SelectTrigger className="bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 rounded-xl">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-gray-200/50 dark:border-gray-700/50 rounded-xl">
                     <SelectItem value="income">Income</SelectItem>
                     <SelectItem value="expense">Expense</SelectItem>
                   </SelectContent>
@@ -562,7 +581,7 @@ export default function FinancePage() {
                   <SelectTrigger className="bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 rounded-xl">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-gray-200/50 dark:border-gray-700/50 rounded-xl">
                     {budgets.map((budget) => (
                       <SelectItem key={budget.id} value={budget.category}>
                         {budget.category}
@@ -585,22 +604,29 @@ export default function FinancePage() {
               <div className="space-y-4">
                 <h3 className="font-semibold mb-4">Recent Transactions</h3>
                 <div className="space-y-3 max-h-[400px] overflow-y-auto pr-4">
-                  {transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((transaction) => (
+                  {transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((transaction, index) => (
                     <div
                       key={transaction.id}
-                      className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-gray-200/50 dark:border-gray-700/50"
+                      className={`flex items-center justify-between p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-gray-100/50 dark:border-gray-700/50 transition-all duration-200
+                        ${index === 0 
+                          ? "shadow-[0_8px_16px_-6px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_20px_-6px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_16px_-6px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_12px_20px_-6px_rgba(0,0,0,0.4)] hover:bg-white/90 dark:hover:bg-gray-800/90" 
+                          : "shadow-[0_2px_4px_-2px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[0_2px_4px_-2px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_4px_8px_-4px_rgba(0,0,0,0.3)] hover:bg-white/70 dark:hover:bg-gray-800/70"
+                        }
+                        ${index === 0 ? "z-10" : "z-0"}`}
                     >
                       <div className="flex flex-col">
-                        <span className="font-medium">{transaction.description}</span>
-                        <span className="text-sm text-muted-foreground">
+                        <span className={`font-medium text-gray-900 dark:text-gray-100 ${index === 0 ? "text-base" : "text-[15px]"}`}>
+                          {transaction.description}
+                        </span>
+                        <span className={`text-gray-500 dark:text-gray-400 ${index === 0 ? "text-sm" : "text-[13px]"}`}>
                           {transaction.category} • {new Date(transaction.date).toLocaleDateString()}
                         </span>
                       </div>
                       <span className={`font-semibold ${
                         transaction.type === 'income' 
-                          ? 'text-green-600' 
-                          : 'text-red-600'
-                      }`}>
+                          ? 'text-emerald-600 dark:text-emerald-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      } ${index === 0 ? "text-base" : "text-[15px]"}`}>
                         {transaction.type === 'income' ? '+' : '-'}₹{transaction.amount.toLocaleString()}
                       </span>
                     </div>
@@ -611,7 +637,7 @@ export default function FinancePage() {
               {/* Expense Distribution */}
               <div>
                 <h3 className="font-semibold mb-4">Expense Distribution</h3>
-                <div className="h-[400px]">
+                <div className="h-[400px] flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -625,6 +651,7 @@ export default function FinancePage() {
                         outerRadius={100}
                         fill="#8884d8"
                         dataKey="value"
+                        className="drop-shadow-xl"
                         label={({ name, value, percent, cx, cy, midAngle, innerRadius, outerRadius }) => {
                           const RADIAN = Math.PI / 180;
                           const radius = outerRadius + 20;
@@ -707,6 +734,21 @@ export default function FinancePage() {
                     </div>
                   )}
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Classification</Label>
+                <Select
+                  value={editingBudget.classification}
+                  onValueChange={(value) => setEditingBudget({ ...editingBudget, classification: value as "need" | "want" })}
+                >
+                  <SelectTrigger className="bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 rounded-xl">
+                    <SelectValue placeholder="Select classification" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-gray-200/50 dark:border-gray-700/50 rounded-xl">
+                    <SelectItem value="need">Need</SelectItem>
+                    <SelectItem value="want">Want</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Budget Amount</Label>
