@@ -1,4 +1,4 @@
-# FinWise.ly - Your Personal Finance Management Platform
+# FinWise.ly - Your Personal Finance Management Platform ![Last Commit](https://img.shields.io/github/last-commit/JyotirmoyDas05/finwise.ly)
 
 FinWise.ly is a modern, AI-powered personal finance management platform that helps users track their expenses, set financial goals, and learn about personal finance through interactive content and AI assistance.
 
@@ -26,9 +26,9 @@ All planned features have been successfully implemented and the application is r
 ## Tech Stack
 
 ### Frontend
-- **Framework**: Next.js 15
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS with custom theming
+- **Framework**: Next.js 15 ![NPM Version](https://img.shields.io/npm/v/react)  ![Next.js](https://img.shields.io/badge/Next.js-15-blue)
+- **Language**: TypeScript  ![TypeScript](https://img.shields.io/badge/TypeScript-4.5-blue)
+- **Styling**: Tailwind CSS with custom theming  ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.0-blue)
 - **UI Components**: 
   - Radix UI (for accessible components)
   - Lucide React (for icons)
