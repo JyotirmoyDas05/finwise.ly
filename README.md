@@ -249,7 +249,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-For support, email support@finwise.ly or join our Slack channel.
+For support, email jyotimoydascse@gmail.com or join our Discord Channel(To be Given soon).
 
 ## Acknowledgments
 
