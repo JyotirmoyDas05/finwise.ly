@@ -15,13 +15,13 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 const ExpenseDistributionChart = ({ budgetData }: ExpenseDistributionChartProps) => {
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <div style={{ width: 400, height: 400 }}>
+      <div className="w-full h-full max-w-[400px]">
         <PieChart width={400} height={400}>
           <Pie
             data={budgetData}
-            cx={180}
-            cy={190}
-            outerRadius={120}
+            cx="50%"
+            cy="50%"
+            outerRadius={100}
             fill="#8884d8"
             paddingAngle={2}
             dataKey="value"
@@ -49,6 +49,15 @@ const ExpenseDistributionChart = ({ budgetData }: ExpenseDistributionChartProps)
             verticalAlign="bottom"
             height={36}
             iconType="circle"
+            layout="horizontal"
+            wrapperStyle={{
+              paddingTop: "20px",
+              width: "100%",
+              fontSize: "12px",
+              overflowX: "auto",
+              overflowY: "hidden",
+              whiteSpace: "nowrap"
+            }}
           />
         </PieChart>
       </div>

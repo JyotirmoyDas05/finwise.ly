@@ -467,20 +467,22 @@ export default function FinancePage() {
                       {newBudget.emoji}
                     </Button>
                     {showEmojiPicker && (
-                      <div className="absolute z-50 left-full ml-2 top-0">
-                        <EmojiPicker
-                          onEmojiClick={(emojiData) => {
-                            setNewBudget({ ...newBudget, emoji: emojiData.emoji });
-                            setShowEmojiPicker(false);
-                          }}
-                          width={300}
-                          height={400}
-                          theme={Theme.LIGHT}
-                          searchPlaceholder="Search emoji..."
-                          previewConfig={{
-                            showPreview: false
-                          }}
-                        />
+                      <div className="fixed inset-0 bg-black/50 flex items-center justify-center" style={{ zIndex: 99999 }} onClick={(e) => {
+                        if (e.target === e.currentTarget) {
+                          setShowEmojiPicker(false);
+                        }
+                      }}>
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4" style={{ position: 'relative', zIndex: 100000 }}>
+                          <EmojiPicker
+                            onEmojiClick={(emojiData) => {
+                              setNewBudget({ ...newBudget, emoji: emojiData.emoji });
+                              setShowEmojiPicker(false);
+                            }}
+                            theme={Theme.LIGHT}
+                            width={300}
+                            height={400}
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
@@ -762,20 +764,22 @@ export default function FinancePage() {
                     {editingBudget.emoji}
                   </Button>
                   {showEmojiPicker && (
-                    <div className="absolute z-50 left-full ml-2 top-0">
-                      <EmojiPicker
-                        onEmojiClick={(emojiData) => {
-                          setEditingBudget({ ...editingBudget, emoji: emojiData.emoji });
-                          setShowEmojiPicker(false);
-                        }}
-                        width={300}
-                        height={400}
-                        theme={Theme.LIGHT}
-                        searchPlaceholder="Search emoji..."
-                        previewConfig={{
-                          showPreview: false
-                        }}
-                      />
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center" style={{ zIndex: 99999 }} onClick={(e) => {
+                      if (e.target === e.currentTarget) {
+                        setShowEmojiPicker(false);
+                      }
+                    }}>
+                      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4" style={{ position: 'relative', zIndex: 100000 }}>
+                        <EmojiPicker
+                          onEmojiClick={(emojiData) => {
+                            setEditingBudget({ ...editingBudget, emoji: emojiData.emoji });
+                            setShowEmojiPicker(false);
+                          }}
+                          theme={Theme.LIGHT}
+                          width={300}
+                          height={400}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
