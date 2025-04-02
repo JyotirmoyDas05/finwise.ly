@@ -13,12 +13,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Progress } from "@/components/ui/progress";
 import { Plus, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useRouter } from "next/navigation";
 import { StyledDialog } from "@/components/ui/styled-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import EmojiPicker from "emoji-picker-react";
 import { Theme } from "emoji-picker-react";
+import dynamic from 'next/dynamic';
 
 interface Budget {
   id: string;
@@ -47,6 +47,14 @@ interface FinancialOverview {
 }
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
+
+// Fix the dynamic import with proper typing
+const ExpenseDistributionChart = dynamic<{
+  budgetData: { name: string; value: number; }[];
+}>(
+  () => import('../../../components/expense-distribution-chart'),
+  { ssr: false, loading: () => <div className="w-full h-full flex items-center justify-center">Loading chart...</div> }
+);
 
 export default function FinancePage() {
   const { user } = useAuth();
@@ -81,6 +89,26 @@ export default function FinancePage() {
   const [showIncomeDialog, setShowIncomeDialog] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [showEditBudgetDialog, setShowEditBudgetDialog] = useState(false);
+  const [clientSide, setClientSide] = useState(false);
+  const [chartData, setChartData] = useState<{ name: string; value: number; }[]>([]);
+
+  useEffect(() => {
+    setClientSide(true);
+  }, []);
+
+  useEffect(() => {
+    if (budgets.length > 0) {
+      console.log('Raw budgets:', budgets);
+      const filteredData = budgets
+        .filter(budget => budget.spent > 0)
+        .map(budget => ({
+          name: budget.category || 'Uncategorized',
+          value: Number(budget.spent) || 0
+        }));
+      console.log('Transformed budget data:', filteredData);
+      setChartData(filteredData);
+    }
+  }, [budgets]);
 
   useEffect(() => {
     if (!user?.uid) {
@@ -283,18 +311,20 @@ export default function FinancePage() {
     }
   };
 
-  if (loading) {
+  if (!clientSide) {
     return (
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen bg-[#f8fafc] dark:bg-gray-900">
         <DashboardSidebar />
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-8 overflow-y-auto bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50">
+          <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">My Finance</h1>
           <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded"></div>
+                <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
               ))}
             </div>
+            <div className="h-80 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
+            <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
           </div>
         </div>
       </div>
@@ -638,46 +668,61 @@ export default function FinancePage() {
               <div>
                 <h3 className="font-semibold mb-4">Expense Distribution</h3>
                 <div className="h-[400px] flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={budgets.map(budget => ({
+                  {clientSide ? (
+                    <div className="w-full h-full">
+                      {(() => {
+                        const chartData = budgets
+                          .filter(budget => budget.spent > 0)
+                          .map(budget => ({
                           name: budget.category,
                           value: budget.spent
-                        }))}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={true}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                        className="drop-shadow-xl"
-                        label={({ name, value, percent, cx, cy, midAngle, innerRadius, outerRadius }) => {
-                          const RADIAN = Math.PI / 180;
-                          const radius = outerRadius + 20;
-                          const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                          const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                          return (
-                            <text
-                              x={x}
-                              y={y}
-                              fill="#333"
-                              textAnchor={x > cx ? 'start' : 'end'}
-                              dominantBaseline="central"
-                              className="text-xs"
+                          }));
+                        
+                        console.log('Preparing chart data:', {
+                          rawBudgets: budgets,
+                          filteredData: chartData
+                        });
+
+                        return chartData.length > 0 ? (
+                          <ExpenseDistributionChart budgetData={chartData} />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center text-center p-8">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 mb-4">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                              No expense data yet
+                            </h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                              Add transactions to see your expense distribution
+                            </p>
+                            <Button 
+                              onClick={() => setShowNewTransactionDialog(true)}
+                              className="mt-4 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white rounded-xl"
                             >
-                              {`${name}: ₹${value.toLocaleString()}`}
-                            </text>
-                          );
-                        }}
-                      >
-                        {budgets.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value) => `₹${Number(value).toLocaleString()}`} />
-                    </PieChart>
-                  </ResponsiveContainer>
+                              Add Transaction
+                            </Button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-center p-8">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 mb-4">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                      </svg>
+                      <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                        Loading chart...
+                      </h4>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                        Please wait while we prepare your data
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
