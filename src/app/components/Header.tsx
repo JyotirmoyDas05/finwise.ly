@@ -111,7 +111,7 @@ const Header = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-3 rounded-lg bg-white/80 dark:bg-dark-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-dark-800 transition-colors shadow-md"
+            className="md:hidden p-3 rounded-full bg-white/80 dark:bg-dark-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-dark-800 transition-colors shadow-md hover:shadow-lg"
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           >
             {isMenuOpen ? (
@@ -130,61 +130,43 @@ const Header = () => {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden py-4 bg-white/95 dark:bg-dark-900/95 backdrop-blur-lg rounded-lg shadow-xl mt-2"
+              className="md:hidden py-4 bg-white/95 dark:bg-dark-900/95 backdrop-blur-lg rounded-2xl shadow-xl mt-2 border border-gray-200/50 dark:border-gray-800/50"
             >
               <nav className="flex flex-col space-y-2">
                 <button 
                   onClick={() => scrollToSection('features')}
-                  className="font-sans text-base font-semibold text-dark-900 dark:text-white hover:text-green transition-colors px-4 py-3"
+                  className="font-sans text-base font-semibold text-dark-900 dark:text-white hover:text-green transition-colors px-6 py-3 hover:bg-gray-50 dark:hover:bg-dark-800/50 rounded-xl mx-4  "
                 >
                   Features
                 </button>
                 <button 
                   onClick={() => scrollToSection('how-it-works')}
-                  className="font-sans text-base font-semibold text-dark-900 dark:text-white hover:text-green transition-colors px-4 py-3"
+                  className="font-sans text-base font-semibold text-dark-900 dark:text-white hover:text-green transition-colors px-6 py-3 hover:bg-gray-50 dark:hover:bg-dark-800/50 rounded-xl mx-4 text-center "
                 >
                   How It Works
                 </button>
                 <button 
                   onClick={() => scrollToSection('pricing')}
-                  className="font-sans text-base font-semibold text-dark-900 dark:text-white hover:text-green transition-colors px-4 py-3"
+                  className="font-sans text-base font-semibold text-dark-900 dark:text-white hover:text-green transition-colors px-6 py-3 hover:bg-gray-50 dark:hover:bg-dark-800/50 rounded-xl mx-4 text-center "
                 >
                   Pricing
                 </button>
                 <button 
                   onClick={() => scrollToSection('contact')}
-                  className="font-sans text-base font-semibold text-dark-900 dark:text-white hover:text-green transition-colors px-4 py-3"
+                  className="font-sans text-base font-semibold text-dark-900 dark:text-white hover:text-green transition-colors px-6 py-3 hover:bg-gray-50 dark:hover:bg-dark-800/50 rounded-xl mx-4 text-center "
                 >
                   Contact
                 </button>
                 <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
-                {/* Theme toggle temporarily disabled
-                <button
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="font-sans text-base font-semibold text-dark-900 dark:text-white hover:text-green transition-colors px-4 py-3 flex items-center space-x-2"
-                >
-                  {theme === 'dark' ? (
-                    <>
-                      <Sun className="w-5 h-5" />
-                      <span>Light Mode</span>
-                    </>
-                  ) : (
-                    <>
-                      <Moon className="w-5 h-5" />
-                      <span>Dark Mode</span>
-                    </>
-                  )}
-                </button>
-                */}
                 <Link 
                   href="/login" 
-                  className="font-sans text-base font-semibold text-dark-900 dark:text-white hover:text-green transition-colors px-4 py-3"
+                  className="font-sans text-base font-semibold text-dark-900 dark:text-white hover:text-green transition-colors px-6 py-3 hover:bg-gray-50 dark:hover:bg-dark-800/50 rounded-xl mx-4 text-center "
                 >
                   Login
                 </Link>
                 <Link 
                   href="/signup" 
-                  className="mx-4 my-1 font-sans text-base font-semibold text-white bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl py-3 text-center"
+                  className="mx-4 font-sans text-base font-semibold text-white bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl py-3 px-6 text-center  hover:-translate-y-0.5"
                 >
                   Sign Up
                 </Link>

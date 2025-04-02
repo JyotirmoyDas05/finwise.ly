@@ -70,6 +70,7 @@ export const Header = ({ translate, titleComponent }: any) => {
 export const Card = ({
   rotate,
   scale,
+  translate,
   children,
 }: {
   rotate: MotionValue<number>;
@@ -87,8 +88,10 @@ export const Card = ({
       }}
       className="max-w-5xl -mt-12 mx-auto h-[30rem] md:h-[40rem] w-full border-4 border-[#6C6C6C] p-2 md:p-6 bg-[#222222] rounded-[30px] shadow-2xl"
     >
-      <div className=" h-full w-full  overflow-hidden rounded-2xl bg-gray-100 dark:bg-zinc-900 md:rounded-2xl md:p-4 ">
-        {children}
+      <div className="relative h-full w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-zinc-900 md:rounded-2xl md:p-4">
+        <div className="absolute inset-0 flex items-center justify-center">
+          {children}
+        </div>
       </div>
     </motion.div>
   );

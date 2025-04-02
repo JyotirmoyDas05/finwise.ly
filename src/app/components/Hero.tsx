@@ -59,7 +59,7 @@ const Hero = () => {
             alt="AI-powered financial guidance"
             width={1400}
             height={720}
-            className="mx-auto rounded-2xl object-cover h-full"
+            className="w-full h-full object-contain max-w-[90vw] md:max-w-[85vw] lg:max-w-[80vw] mx-auto rounded-2xl"
             priority
           />
         </ContainerScroll>
