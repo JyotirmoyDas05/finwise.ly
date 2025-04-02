@@ -66,6 +66,7 @@ export function Chat({
   const lastMessage = messages.at(-1)
   const isEmpty = messages.length === 0
   const isTyping = lastMessage?.role === "user"
+  const showTypingIndicator = isTyping || isGenerating
 
   const messagesRef = useRef(messages)
   messagesRef.current = messages
@@ -205,7 +206,7 @@ export function Chat({
         <ChatMessages messages={messages}>
           <MessageList
             messages={messages}
-            isTyping={isTyping}
+            isTyping={showTypingIndicator}
             messageOptions={messageOptions}
           />
         </ChatMessages>

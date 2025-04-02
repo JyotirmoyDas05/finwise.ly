@@ -2,7 +2,7 @@
 
 FinWise.ly is a modern, AI-powered personal finance management platform that helps users track their expenses, set financial goals, and learn about personal finance through interactive content and AI assistance.
 
-## ✅ Project Status: Completed
+## ✅ Project Status: Completed ![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
 
 All planned features have been successfully implemented and the application is ready for use!
 
@@ -11,6 +11,14 @@ All planned features have been successfully implemented and the application is r
 ### Dashboard View
 ![FinWise.ly Dashboard](./public/DashBoard.png)
 *The main dashboard provides an overview of financial health, recent transactions, and goal progress*
+
+### Key Features Showcase
+| Feature | Description |
+|---------|-------------|
+| Financial Overview | Track income, expenses, and savings at a glance |
+| Goal Tracking | Visual progress bars for financial goals |
+| AI Assistant | Get personalized financial advice through natural language |
+| Learning Hub | Access curated financial education resources |
 
 ## Features
 
@@ -30,21 +38,22 @@ All planned features have been successfully implemented and the application is r
 - **Language**: TypeScript  ![TypeScript](https://img.shields.io/badge/TypeScript-4.5-blue)
 - **Styling**: Tailwind CSS with custom theming  ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.0-blue)
 - **UI Components**: 
-  - Radix UI (for accessible components)
-  - Lucide React (for icons)
-  - Framer Motion (for animations)
-  - Sonner (for toast notifications)
+  - Shadcn UI (component library) ![Shadcn](https://img.shields.io/badge/Shadcn-1.0-blue)
+  - Radix UI (for accessible components) ![Radix UI](https://img.shields.io/badge/RadixUI-1.0-blue)
+  - Lucide React (for icons) ![Lucide](https://img.shields.io/badge/Lucide-0.48.0-blue)
+  - Framer Motion (for animations) ![Framer](https://img.shields.io/badge/Framer-10.0.1-blue)
+  - Sonner (for toast notifications) ![Sonner](https://img.shields.io/badge/Sonner-2.0.1-blue)
 - **State Management**: React Hooks
-- **Charts**: Recharts for financial visualizations
+- **Charts**: Recharts for financial visualizations ![Recharts](https://img.shields.io/badge/Recharts-2.15.0-blue)
 - **Markdown Support**: React Markdown with Remark GFM
 - **Code Highlighting**: Shiki
 
 ### Backend
-- **Framework**: Next.js API Routes
-- **Database**: Firebase Firestore
-- **Authentication**: NextAuth.js with Firebase
-- **AI Integration**: Google Generative AI (Gemini)
-- **File Storage**: Firebase Storage
+- **Framework**: Next.js API Routes ![Next.js](https://img.shields.io/badge/Next.js-15-blue)
+- **Database**: Firebase Firestore ![Firebase](https://img.shields.io/badge/Firebase-11.5.0-orange)
+- **Authentication**: NextAuth.js with Firebase ![NextAuth](https://img.shields.io/badge/NextAuth-4.24.7-green)
+- **AI Integration**: Google Generative AI (Gemini) ![Gemini](https://img.shields.io/badge/Gemini-0.24.0-purple)
+- **File Storage**: Firebase Storage ![Firebase](https://img.shields.io/badge/Firebase-11.5.0-orange)
 - **Security**: Firebase Rules
 
 ### APIs Used
@@ -58,8 +67,8 @@ All planned features have been successfully implemented and the application is r
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
-- Node.js (v18 or higher)
-- npm or yarn
+- Node.js (v18 or higher) ![Node.js](https://img.shields.io/badge/Node.js-18+-green)
+- npm or yarn ![npm](https://img.shields.io/badge/npm-10+-red)
 - Git
 
 ## Detailed Setup Instructions
@@ -67,7 +76,7 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/finwise-ly.git
+git clone https://github.com/JyotirmoyDas05/finwise.ly.git
 cd finwise-ly
 ```
 
@@ -245,11 +254,11 @@ The AI-powered assistant can answer financial questions, provide personalized ad
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ## Support
 
-For support, email jyotimoydascse@gmail.com or join our Discord Channel(To be Given soon).
+For support, email jyotimoydascse@gmail.com or join our Discord Channel(To be Given soon). ![Email](https://img.shields.io/badge/Email-Support-blue)
 
 ## Acknowledgments
 
@@ -257,3 +266,15 @@ For support, email jyotimoydascse@gmail.com or join our Discord Channel(To be Gi
 - Firebase team for the backend services
 - Google AI team for the generative AI capabilities
 - All contributors who have helped shape this project
+
+---
+
+<div align="center">
+  
+  ![Stars](https://img.shields.io/github/stars/JyotirmoyDas05/finwise.ly?style=social)
+  ![Forks](https://img.shields.io/github/forks/JyotirmoyDas05/finwise.ly?style=social)
+  ![Contributors](https://img.shields.io/github/contributors/JyotirmoyDas05/finwise.ly)
+  ![Issues](https://img.shields.io/github/issues/JyotirmoyDas05/finwise.ly)
+  
+  <p>Made with ❤️ by Team CodeProwlers</p>
+</div>

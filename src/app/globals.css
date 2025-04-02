@@ -50,6 +50,8 @@ body {
   font-family: 'Roboto', sans-serif;
   font-weight: 400;
   transition: background-color 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
 }
 
 /* Typography */
@@ -67,6 +69,46 @@ h1, h2, h3, h4, h5, h6 {
 body, p, input, textarea, select {
   font-family: 'Roboto', sans-serif;
   font-weight: 400;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.25rem;
+  }
+  
+  h3 {
+    font-size: 1.125rem;
+  }
+  
+  .card-content-mobile {
+    padding: 1rem;
+  }
+  
+  /* Improve touch targets for mobile */
+  button, 
+  [role="button"],
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Ensure inputs are easier to interact with on mobile */
+  input, 
+  textarea, 
+  select {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+  
+  /* Fix for iOS momentum scrolling */
+  .overflow-auto,
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* Override base styles when specific font classes are used */
@@ -194,4 +236,34 @@ p {
 .dark .shadow-lg,
 .dark .shadow-sm {
   --tw-shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Fix for mobile devices to prevent content overflow */
+.container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Better card styles for mobile */
+@media (max-width: 640px) {
+  .card {
+    border-radius: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .card-header {
+    padding: 1rem 1rem 0.5rem;
+  }
+  
+  .card-content {
+    padding: 0.75rem 1rem 1rem;
+  }
+}
+
+/* Fix for any charts to be responsive */
+.recharts-responsive-container,
+.recharts-wrapper {
+  width: 100% !important;
+  height: auto !important;
 }

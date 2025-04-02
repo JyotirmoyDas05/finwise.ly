@@ -8,7 +8,7 @@ const Sidebar = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex h-screen w-64 flex-col border-r bg-background", className)}
+    className={cn("flex flex-col border-r bg-background h-full", className)}
     {...props}
   />
 ))

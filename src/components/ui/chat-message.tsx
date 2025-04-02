@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { motion } from "framer-motion"
-import { Ban, ChevronRight, Code2, Loader2, Terminal } from "lucide-react"
+import { Ban, ChevronRight, Code2, Loader2, Terminal, User, Bot } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import {
@@ -15,12 +15,12 @@ import { FilePreview } from "@/components/ui/file-preview"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 
 const chatBubbleVariants = cva(
-  "group/message relative break-words rounded-2xl p-4 text-[15px] leading-relaxed tracking-normal font-normal sm:max-w-[85%] prose prose-slate dark:prose-invert prose-p:leading-relaxed prose-pre:my-2 prose-pre:bg-slate-800/80 prose-pre:p-4 prose-pre:rounded-lg",
+  "group/message relative break-words rounded-2xl p-4 text-[15px] leading-relaxed tracking-normal font-normal max-w-[75%] prose prose-slate dark:prose-invert prose-p:leading-relaxed prose-pre:my-2 prose-pre:bg-slate-800/80 prose-pre:p-4 prose-pre:rounded-lg",
   {
     variants: {
       isUser: {
-        true: "bg-primary text-primary-foreground prose-headings:text-primary-foreground prose-a:text-primary-foreground/90",
-        false: "bg-muted text-foreground shadow-sm prose-headings:text-foreground prose-a:text-primary/90",
+        true: "bg-primary text-primary-foreground prose-headings:text-primary-foreground prose-a:text-primary-foreground/90 rounded-tr-none",
+        false: "bg-muted text-foreground shadow-sm prose-headings:text-foreground prose-a:text-primary/90 rounded-tl-none",
       },
       animation: {
         none: "",
@@ -133,12 +133,44 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   parts,
 }) => {
   const files = useMemo(() => {
-    return experimental_attachments?.map((attachment) => {
-      const dataArray = dataUrlToUint8Array(attachment.url)
-      const file = new File([dataArray], attachment.name ?? "Unknown")
-      return file
-    })
-  }, [experimental_attachments])
+    if (!experimental_attachments || !Array.isArray(experimental_attachments)) {
+      return undefined;
+    }
+    
+    return experimental_attachments
+      .filter(attachment => attachment && attachment.url) // Filter out invalid attachments
+      .map((attachment) => {
+        try {
+          // Handle blob URLs and data URLs differently
+          if (attachment.url.startsWith('blob:')) {
+            // For blob URLs, we already have a reference to the file
+            // We can create a simple File object with the name and contentType
+            return new File(
+              [new Uint8Array(0)], // Placeholder content
+              attachment.name ?? "Unknown", 
+              { type: attachment.contentType || "application/octet-stream" }
+            );
+          } else {
+            // For data URLs, process as before
+            const dataArray = dataUrlToUint8Array(attachment.url);
+            // Skip creating a file if the data array is empty
+            if (dataArray.length === 0) {
+              console.warn(`Skipping file creation for attachment: ${attachment.name || 'unknown'}`);
+              return null;
+            }
+            return new File(
+              [dataArray], 
+              attachment.name ?? "Unknown", 
+              { type: attachment.contentType || "application/octet-stream" }
+            );
+          }
+        } catch (error) {
+          console.error(`Error creating file from attachment: ${attachment.name}`, error);
+          return null;
+        }
+      })
+      .filter((file): file is File => file !== null); // Type guard to ensure non-null files
+  }, [experimental_attachments]);
 
   const isUser = role === "user"
 
@@ -147,12 +179,26 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     minute: "2-digit",
   })
 
+  // User icon component
+  const UserAvatar = () => (
+    <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-primary/90 text-primary-foreground shadow-sm ring-2 ring-background">
+      <User className="h-4 w-4" />
+    </div>
+  );
+
+  // Assistant icon component
+  const AIAvatar = () => (
+    <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full bg-accent/90 text-white shadow-sm ring-2 ring-background">
+      <Bot className="h-4 w-4" />
+    </div>
+  );
+
   if (isUser) {
     return (
       <div
         className={cn("flex flex-col", isUser ? "items-end" : "items-start")}
       >
-        {files ? (
+        {files && files.length > 0 ? (
           <div className="mb-1 flex flex-wrap gap-2">
             {files.map((file, index) => {
               return <FilePreview file={file} key={index} />
@@ -160,10 +206,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           </div>
         ) : null}
 
-        <div className={cn(chatBubbleVariants({ isUser, animation }))}>
-          <div className="prose-code:bg-primary-foreground/10 prose-code:text-primary-foreground prose-code:px-1 prose-code:py-0.5 prose-code:rounded-md prose-code:font-mono prose-code:text-sm">
-            <MarkdownRenderer>{content}</MarkdownRenderer>
+        <div className="flex items-end gap-2">
+          <div className={cn(chatBubbleVariants({ isUser, animation }))}>
+            <div className="prose-code:bg-primary-foreground/10 prose-code:text-primary-foreground prose-code:px-1 prose-code:py-0.5 prose-code:rounded-md prose-code:font-mono prose-code:text-sm">
+              <MarkdownRenderer>{content}</MarkdownRenderer>
+            </div>
           </div>
+          <UserAvatar />
         </div>
 
         {showTimeStamp && createdAt ? (
@@ -192,13 +241,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             )}
             key={`text-${index}`}
           >
-            <div className={cn(chatBubbleVariants({ isUser, animation }))}>
-              <MarkdownRenderer>{part.text}</MarkdownRenderer>
-              {actions ? (
-                <div className="absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100">
-                  {actions}
-                </div>
-              ) : null}
+            <div className="flex items-end gap-2">
+              {!isUser && <AIAvatar />}
+              <div className={cn(chatBubbleVariants({ isUser, animation }))}>
+                <MarkdownRenderer>{part.text}</MarkdownRenderer>
+                {actions ? (
+                  <div className="absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100">
+                    {actions}
+                  </div>
+                ) : null}
+              </div>
+              {isUser && <UserAvatar />}
             </div>
 
             {showTimeStamp && createdAt ? (
@@ -234,13 +287,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
   return (
     <div className={cn("flex flex-col", isUser ? "items-end" : "items-start")}>
-      <div className={cn(chatBubbleVariants({ isUser, animation }))}>
-        <MarkdownRenderer>{content}</MarkdownRenderer>
-        {actions ? (
-          <div className="absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100">
-            {actions}
-          </div>
-        ) : null}
+      <div className="flex items-end gap-2">
+        {!isUser && <AIAvatar />}
+        <div className={cn(chatBubbleVariants({ isUser, animation }))}>
+          <MarkdownRenderer>{content}</MarkdownRenderer>
+          {actions ? (
+            <div className="absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100">
+              {actions}
+            </div>
+          ) : null}
+        </div>
+        {isUser && <UserAvatar />}
       </div>
 
       {showTimeStamp && createdAt ? (
@@ -259,9 +316,47 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 }
 
 function dataUrlToUint8Array(data: string) {
-  const base64 = data.split(",")[1]
-  const buf = Buffer.from(base64, "base64")
-  return new Uint8Array(buf)
+  try {
+    // Check if the data is valid
+    if (!data || typeof data !== 'string') {
+      console.error('Invalid data URL received:', data);
+      // Return an empty array instead of failing
+      return new Uint8Array(0);
+    }
+    
+    // Special handling for blob URLs (blob:http://...)
+    if (data.startsWith('blob:')) {
+      console.log('Blob URL detected, cannot convert directly:', data);
+      // For blob URLs, we can't convert directly, but we'll return an empty array
+      // instead of throwing an error
+      return new Uint8Array(0);
+    }
+    
+    // For data URLs (data:...)
+    if (data.startsWith('data:')) {
+      // Ensure the data URL has the expected format
+      if (!data.includes(',')) {
+        console.error('Data URL is missing comma separator:', data);
+        return new Uint8Array(0);
+      }
+      
+      const base64 = data.split(",")[1];
+      if (!base64) {
+        console.error('Data URL has invalid format:', data);
+        return new Uint8Array(0);
+      }
+      
+      const buf = Buffer.from(base64, "base64");
+      return new Uint8Array(buf);
+    }
+    
+    // If it's neither a blob nor a data URL, log and return empty array
+    console.warn('URL is neither a blob nor a data URL:', data);
+    return new Uint8Array(0);
+  } catch (error) {
+    console.error('Error processing URL:', error);
+    return new Uint8Array(0);
+  }
 }
 
 const ReasoningBlock = ({ part }: { part: ReasoningPart }) => {

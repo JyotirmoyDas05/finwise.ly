@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect } from "react"
+import { Suspense, useEffect, useRef, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -16,9 +16,9 @@ import { db } from "@/app/lib/firebase"
 import { doc, getDoc } from "firebase/firestore"
 import { useAuth } from "@/app/context/AuthContext"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
 import { collection, getDocs, query, where } from "firebase/firestore"
 import { cn } from "@/lib/utils"
+import { searchYouTubeVideos, formatDuration, YouTubeVideo } from "@/lib/youtube"
 
 interface UserData {
   profile: {
@@ -79,6 +79,15 @@ interface Transaction {
   date: string;
 }
 
+// Define section IDs for scroll restoration
+const SECTION_IDS = {
+  GOALS: "goals-section",
+  FINANCES: "finances-section",
+  INSIGHTS: "insights-section",
+  EDUCATION: "education-section",
+  QUICK_ACTIONS: "quick-actions-section"
+};
+
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -87,6 +96,49 @@ export default function Dashboard() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [tutorialVideos, setTutorialVideos] = useState<YouTubeVideo[]>([]);
+  const hasMounted = useRef(false);
+  
+  // Ref to track if this is a back navigation
+  const isBackNavigation = useRef(false);
+
+  // Track click on section navigation
+  const navigateWithSection = (path: string, sectionId: string) => {
+    try {
+      // Store section ID in localStorage for persistence
+      localStorage.setItem('dashboardLastSection', sectionId);
+      router.push(path);
+    } catch (error) {
+      console.error('Error storing section info:', error);
+      router.push(path); // Fallback to regular navigation
+    }
+  };
+
+  // Handle scroll restoration on component mount
+  useEffect(() => {
+    // Only run this after initial load and after data is loaded
+    if (!loading && userData && !hasMounted.current) {
+      hasMounted.current = true;
+      
+      try {
+        // Get the saved section ID from localStorage
+        const sectionId = localStorage.getItem('dashboardLastSection');
+        if (sectionId) {
+          // Small delay to ensure DOM is fully rendered
+          setTimeout(() => {
+            const element = document.getElementById(sectionId);
+            if (element) {
+              // Scroll to that section with smooth animation
+              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              console.log('Scrolled to section:', sectionId);
+            }
+          }, 500);
+        }
+      } catch (error) {
+        console.error('Error restoring scroll position:', error);
+      }
+    }
+  }, [loading, userData]);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -164,6 +216,20 @@ export default function Dashboard() {
 
     fetchUserData();
   }, [user, router]);
+
+  useEffect(() => {
+    async function fetchYouTubeVideos() {
+      try {
+        // Fetch short financial education videos
+        const response = await searchYouTubeVideos('short personal finance tips', 4);
+        setTutorialVideos(response.items);
+      } catch (error) {
+        console.error('Error fetching YouTube videos:', error);
+      }
+    }
+
+    fetchYouTubeVideos();
+  }, []);
 
   const calculateHealthScore = (budgets: UserData['finances']['budgets'], transactions: UserData['finances']['transactions']): number => {
     const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
@@ -302,22 +368,22 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex flex-col md:flex-row h-screen bg-background">
       <DashboardSidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto px-6 py-8">
+      <div className="flex-1 overflow-auto pt-16 md:pt-0">
+        <div className="container mx-auto px-4 md:px-6 py-6 md:py-8">
           <Suspense fallback={<DashboardSkeleton />}>
             {/* Welcome Section */}
-            <Card className="mb-8 border-0 shadow-lg bg-gradient-to-b from-background to-background/40 backdrop-blur-sm">
+            <Card className="mb-6 md:mb-8 border-0 shadow-lg bg-gradient-to-b from-background to-background/40 backdrop-blur-sm">
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-4">
                   <div className="flex items-center space-x-4">
                     <Avatar className="h-12 w-12 ring-2 ring-primary/20 shadow-lg">
                       <AvatarImage src={userData.profile.image} alt={userData.profile.name} />
                       <AvatarFallback className="bg-primary/5">{userData.profile.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <CardTitle className="text-2xl font-medium text-foreground/90">
+                      <CardTitle className="text-xl md:text-2xl font-medium text-foreground/90">
                         Welcome, {userData.profile.name}!
                       </CardTitle>
                       <CardDescription className="text-base">Let&apos;s Make Finance Simple Today!</CardDescription>
@@ -326,7 +392,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     size="default"
-                    className="px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/50 hover:bg-primary hover:text-white backdrop-blur-sm border-2 border-primary/20 hover:border-primary rounded-xl font-medium"
+                    className="px-4 md:px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/50 hover:bg-primary hover:text-white backdrop-blur-sm border-2 border-primary/20 hover:border-primary rounded-xl font-medium w-full sm:w-auto"
                     onClick={async () => {
                       try {
                         await logout();
@@ -342,14 +408,14 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-sm text-muted-foreground mb-6">
+                <div className="text-sm text-muted-foreground mb-4 md:mb-6">
                   <span className="inline-flex items-center bg-primary/5 px-3 py-1 rounded-xl shadow-sm">
                     <Lightbulb className="h-4 w-4 mr-2 text-primary" />
                     <em>Tip: Try saving 20% of your income. It&apos;s easier than you think!</em>
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                   <Card className="border shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-background to-background/40">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium">Income vs. Expenses</CardTitle>
@@ -357,13 +423,13 @@ export default function Dashboard() {
                     <CardContent>
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-2xl font-semibold text-primary/90">
+                          <p className="text-lg md:text-2xl font-semibold text-primary/90">
                             ₹{userData.finances.monthlyIncome.toLocaleString()}
                           </p>
                           <p className="text-xs text-muted-foreground">Income</p>
                         </div>
                         <div>
-                          <p className="text-2xl font-semibold text-secondary/90">
+                          <p className="text-lg md:text-2xl font-semibold text-secondary/90">
                             ₹{userData.finances.monthlyExpenses.toLocaleString()}
                           </p>
                           <p className="text-xs text-muted-foreground">Expenses</p>
@@ -408,18 +474,18 @@ export default function Dashboard() {
             </Card>
 
             {/* Goals Progress Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <Card className="shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-background to-background/40">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
+              <Card id={SECTION_IDS.GOALS} className="shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-background to-background/40">
                 <CardHeader>
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                       <CardTitle className="text-lg font-medium">Financial Goals</CardTitle>
                       <CardDescription>Track your progress</CardDescription>
                     </div>
                     <Button 
                       variant="outline" 
-                      className="rounded-xl border-2 transition-colors hover:bg-primary hover:text-primary-foreground"
-                      onClick={() => router.push('/dashboard/goals')}
+                      className="rounded-xl border-2 transition-colors hover:bg-primary hover:text-primary-foreground w-full sm:w-auto"
+                      onClick={() => navigateWithSection('/dashboard/goals', SECTION_IDS.GOALS)}
                     >
                       <Target className="h-4 w-4 mr-2" />
                       View All
@@ -461,7 +527,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-background to-background/40">
+              <Card id={SECTION_IDS.FINANCES} className="shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-background to-background/40">
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <div>
@@ -471,7 +537,7 @@ export default function Dashboard() {
                     <Button 
                       variant="outline" 
                       className="rounded-xl border-2 transition-colors hover:bg-primary hover:text-primary-foreground"
-                      onClick={() => router.push('/dashboard/finance')}
+                      onClick={() => navigateWithSection('/dashboard/finance', SECTION_IDS.FINANCES)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Manage
@@ -494,7 +560,7 @@ export default function Dashboard() {
             </div>
 
             {/* Financial Insights Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div id={SECTION_IDS.INSIGHTS} className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
               <Card className="shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-background to-background/40">
                 <CardHeader>
                   <CardTitle className="text-lg font-medium">Where Your Money Goes</CardTitle>
@@ -536,46 +602,66 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            {/* Educational Section */}
-            <Card className="mb-6">
+            {/* Educational Content Section */}
+            <Card id={SECTION_IDS.EDUCATION} className="mb-6">
               <CardHeader>
                 <CardTitle className="text-lg font-medium">Finance Made Easy</CardTitle>
                 <CardDescription>Learn finance in simple steps</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-6">
                   <EducationalCard
                     title="How to Save Money"
                     description="A beginner's guide to saving money effectively"
                     icon="💰"
                     readTime="3 min read"
+                    link="https://www.iciciprulife.com/investments/how-to-save-money.html"
+                    target="_blank"
                   />
                   <EducationalCard
                     title="What is Investing?"
                     description="Investing explained in simple terms"
                     icon="📈"
                     readTime="3 min read"
+                    link="https://www.iciciprulife.com/investments.html"
+                    target="_blank"
                   />
                   <EducationalCard
                     title="How to Avoid Debt Traps"
                     description="Simple strategies to stay debt-free"
                     icon="💳"
                     readTime="3 min read"
+                    link="https://www.forbes.com/sites/truetamplin/2024/12/26/7-effective-strategies-to-help-you-avoid-new-debt-in-2025/"
+                    target="_blank"
                   />
                 </div>
 
-                <h3 className="font-medium text-base mb-4">Quick 1-Minute Video Tutorials</h3>
+                <h3 className="font-medium text-base mb-4 text-lg ">Quick  Video Tutorials</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <VideoTutorialCard
-                    title="How to Budget Like a Pro"
-                    thumbnail="/placeholder.svg?height=120&width=240"
-                    duration="1:00"
-                  />
-                  <VideoTutorialCard
-                    title="Why Credit Scores Matter"
-                    thumbnail="/placeholder.svg?height=120&width=240"
-                    duration="1:00"
-                  />
+                  {tutorialVideos.length > 0 ? (
+                    tutorialVideos.slice(0, 2).map((video) => (
+                      <VideoTutorialCard
+                        key={video.id.videoId}
+                        title={video.snippet.title}
+                        thumbnail={video.snippet.thumbnails.high.url}
+                        duration={video.contentDetails?.duration ? formatDuration(video.contentDetails.duration) : "1:00"}
+                        videoId={video.id.videoId}
+                      />
+                    ))
+                  ) : (
+                    <>
+                      <VideoTutorialCard
+                        title="How to Budget Like a Pro"
+                        thumbnail="/placeholder.svg?height=120&width=240"
+                        duration="1:00"
+                      />
+                      <VideoTutorialCard
+                        title="Why Credit Scores Matter"
+                        thumbnail="/placeholder.svg?height=120&width=240"
+                        duration="1:00"
+                      />
+                    </>
+                  )}
                 </div>
 
                 <div className="bg-muted p-4 rounded-lg flex items-center justify-between">
@@ -586,7 +672,7 @@ export default function Dashboard() {
                   <Button 
                     variant="outline" 
                     className="rounded-xl border-2 transition-colors hover:bg-primary hover:text-primary-foreground"
-                    onClick={() => router.push('/dashboard/ask')}
+                    onClick={() => navigateWithSection('/dashboard/ask', SECTION_IDS.EDUCATION)}
                   >
                     <MessageSquareText className="h-4 w-4 mr-2" />
                     Ask a Question
@@ -595,17 +681,18 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Quick Actions Panel */}
-            <Card className="shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-background to-background/40">
+            {/* Quick Actions Section */}
+            <Card id={SECTION_IDS.QUICK_ACTIONS} className="shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-background to-background/40">
               <CardHeader>
                 <CardTitle className="text-lg font-medium">Quick Actions</CardTitle>
                 <CardDescription>Easy-to-use shortcuts</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                   <Button 
                     className="h-auto py-4 flex flex-col items-center justify-center gap-2 rounded-xl shadow-lg hover:shadow-xl hover:translate-y-[-2px] transition-all bg-gradient-to-br from-primary to-primary/90"
                     variant="default"
+                    onClick={() => navigateWithSection('/dashboard/finance', SECTION_IDS.QUICK_ACTIONS)}
                   >
                     <PlusCircle className="h-6 w-6 drop-shadow" />
                     <span>Add Expense</span>
@@ -613,6 +700,7 @@ export default function Dashboard() {
                   <Button 
                     className="h-auto py-4 flex flex-col items-center justify-center gap-2 rounded-xl border-2 shadow-lg hover:shadow-xl hover:translate-y-[-2px] transition-all bg-gradient-to-br from-background to-background/40"
                     variant="outline"
+                    onClick={() => navigateWithSection('/dashboard/goals', SECTION_IDS.QUICK_ACTIONS)}
                   >
                     <Target className="h-6 w-6 drop-shadow" />
                     <span>Set a Goal</span>
@@ -620,7 +708,7 @@ export default function Dashboard() {
                   <Button 
                     className="h-auto py-4 flex flex-col items-center justify-center gap-2 rounded-xl border-2 shadow-lg hover:shadow-xl hover:translate-y-[-2px] transition-all bg-gradient-to-br from-background to-background/40"
                     variant="outline"
-                    onClick={() => router.push('/dashboard/ask')}
+                    onClick={() => navigateWithSection('/dashboard/ask', SECTION_IDS.QUICK_ACTIONS)}
                   >
                     <MessageSquareText className="h-6 w-6 drop-shadow" />
                     <span>Ask AI</span>
