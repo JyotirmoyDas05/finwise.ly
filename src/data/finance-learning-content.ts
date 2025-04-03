@@ -231,17 +231,30 @@ async function generateQuizForTopic(topic: string, description: string, count: n
     // Update to use Gemini 1.5 Pro model which is the latest available
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
     
-    const prompt = `Generate a quiz about ${topic}. Topic description: ${description}
-    Generate ${count} multiple choice questions with 4 options each.
-    Format the response as a JSON array of objects with the following structure:
-    [
-      {
-        "question": "Question text",
-        "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-        "correctAnswer": 0 // Index of correct answer (0-3)
-      }
-    ]
-    Make sure the questions are educational and test understanding of the topic.`;
+    const prompt = `Generate a diverse quiz about ${topic}. Topic description: ${description}
+
+Instructions for question generation:
+1. Generate ${count} unique multiple choice questions
+2. Cover different aspects and subtopics within ${topic}
+3. Include a mix of:
+   - Basic concept understanding
+   - Practical application scenarios
+   - Real-world examples
+   - Problem-solving situations
+   - Current trends and modern practices
+4. Avoid repeating similar concepts across questions
+5. Ensure questions range from basic to advanced difficulty
+
+Format the response as a JSON array of objects with the following structure:
+[
+  {
+    "question": "Question text",
+    "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+    "correctAnswer": 0 // Index of correct answer (0-3)
+  }
+]
+
+Make sure each question is unique and tests different aspects of the topic.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
