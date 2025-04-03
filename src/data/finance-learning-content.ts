@@ -233,28 +233,38 @@ async function generateQuizForTopic(topic: string, description: string, count: n
     
     const prompt = `Generate a diverse quiz about ${topic}. Topic description: ${description}
 
-Instructions for question generation:
-1. Generate ${count} unique multiple choice questions
-2. Cover different aspects and subtopics within ${topic}
-3. Include a mix of:
-   - Basic concept understanding
-   - Practical application scenarios
-   - Real-world examples
-   - Problem-solving situations
-   - Current trends and modern practices
-4. Avoid repeating similar concepts across questions
-5. Ensure questions range from basic to advanced difficulty
-
-Format the response as a JSON array of objects with the following structure:
-[
-  {
-    "question": "Question text",
-    "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-    "correctAnswer": 0 // Index of correct answer (0-3)
-  }
-]
-
-Make sure each question is unique and tests different aspects of the topic.`;
+    Generate exactly ${count} multiple choice questions following these requirements:
+    1. Each question must cover a DIFFERENT aspect of ${topic}
+    2. Include a mix of:
+       - Basic concept understanding
+       - Practical application scenarios
+       - Real-world examples
+       - Problem-solving situations
+       - Current trends and modern practices
+    3. Questions should range from basic to advanced difficulty
+    4. Each question must have exactly 4 options and one correct answer
+    
+    Format your response EXACTLY as a JSON array like this, with no additional text or formatting:
+    [
+      {
+        "question": "Question text here?",
+        "options": [
+          "First option",
+          "Second option",
+          "Third option",
+          "Fourth option"
+        ],
+        "correctAnswer": 0
+      }
+    ]
+    
+    Technical Rules:
+    1. The correctAnswer must be a number from 0-3 indicating the index of the correct option
+    2. Each question must have exactly 4 options
+    3. Do not include any text outside the JSON array
+    4. Do not use markdown formatting
+    5. Ensure the JSON is properly formatted with no trailing commas
+    6. Make sure each question tests a different concept or aspect of the topic`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -262,136 +272,76 @@ Make sure each question is unique and tests different aspects of the topic.`;
     
     console.log("Raw API response:", text);
     
-    // Try to find JSON in the response or use fallbacks
-    if (!text || text.trim().length === 0) {
-      console.log("Empty response from API, using fallback");
-      const category = findMatchingCategory(topic, description);
-      return fallbackQuizzes[category || "DEFAULT"];
-    }
-    
-    // Ensure the response is valid JSON
+    // Clean and parse the JSON
     try {
-      // Check if response text is wrapped in markdown or other text
-      let jsonText = text;
+      // Remove any markdown formatting or extra text
+      let jsonText = text.trim();
       
-      // Try to extract JSON if response is wrapped in markdown or other text
-      const jsonStartMatch = text.match(/```json\s*\n?([\s\S]*?)```/) || 
-                             text.match(/```\s*\n?([\s\S]*?)```/) ||
-                             text.match(/\[\s*\{/);
-      
-      if (jsonStartMatch) {
-        // Extract just the JSON part
-        const possibleJson = jsonStartMatch[1] || text.substring(text.indexOf('['));
-        console.log("Extracted potential JSON:", possibleJson);
-        jsonText = possibleJson;
+      // Extract JSON if wrapped in code blocks
+      const jsonMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[1].trim();
       }
       
-      // Try to parse the JSON
-      let quiz;
-      try {
-        quiz = JSON.parse(jsonText);
-      } catch (initialParseError) {
-        // Look for array pattern and try to extract just that part
-        const arrayMatch = text.match(/\[\s*\{[\s\S]*?\}\s*\]/);
-        if (arrayMatch) {
-          console.log("Trying to parse JSON array directly");
-          quiz = JSON.parse(arrayMatch[0]);
-        } else {
-          throw initialParseError;
-        }
+      // Find the array portion if there's additional text
+      const arrayMatch = jsonText.match(/\[\s*\{[\s\S]*\}\s*\]/);
+      if (arrayMatch) {
+        jsonText = arrayMatch[0];
       }
+      
+      // Remove any trailing commas before closing brackets
+      jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1');
+      
+      // Parse the cleaned JSON
+      const quiz = JSON.parse(jsonText);
       
       // Validate quiz structure
-      if (Array.isArray(quiz) && quiz.length > 0 && quiz[0].question && 
-          Array.isArray(quiz[0].options) && quiz[0].options.length > 0 && 
-          typeof quiz[0].correctAnswer === 'number') {
-        return quiz;
-      } else {
-        console.error("Invalid quiz format received:", quiz);
-        throw new Error("Invalid quiz format");
+      if (!Array.isArray(quiz)) {
+        throw new Error("Quiz is not an array");
       }
+      
+      // Validate and fix each question
+      const validatedQuiz = quiz.map((q, index) => {
+        if (!q.question || !Array.isArray(q.options) || typeof q.correctAnswer !== 'number') {
+          throw new Error(`Invalid question format at index ${index}`);
+        }
+        
+        // Ensure exactly 4 options
+        if (q.options.length !== 4) {
+          throw new Error(`Question ${index + 1} does not have exactly 4 options`);
+        }
+        
+        // Ensure correctAnswer is within valid range
+        if (q.correctAnswer < 0 || q.correctAnswer > 3) {
+          throw new Error(`Invalid correctAnswer for question ${index + 1}`);
+        }
+        
+        return {
+          question: q.question.trim(),
+          options: q.options.map((opt: string) => opt.trim()),
+          correctAnswer: q.correctAnswer
+        };
+      });
+      
+      // Ensure we have the requested number of questions
+      if (validatedQuiz.length !== count) {
+        throw new Error(`Expected ${count} questions but got ${validatedQuiz.length}`);
+      }
+      
+      return validatedQuiz;
     } catch (parseError) {
       console.error("Error parsing quiz JSON:", parseError);
-      console.log("Could not parse response as JSON, using fallback");
+      console.log("Problematic JSON text:", text);
       
       // Get category for fallback
       const category = findMatchingCategory(topic, description);
-      
-      // Return fallback quiz
       return fallbackQuizzes[category || "DEFAULT"];
     }
-  } catch (error: unknown) {
+  } catch (error) {
     console.error("Error generating quiz:", error);
     
-    // If the error is because of model availability, try fallback model
-    if (error instanceof Error && error.toString().includes("not found")) {
-      try {
-        // Try with gemini-1.0-pro if 1.5 is not available
-        console.log("Trying fallback model gemini-1.0-pro");
-        const fallbackModel = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
-        
-        const prompt = `Generate a quiz about ${topic}. Topic description: ${description}
-        Generate ${count} multiple choice questions with 4 options each.
-        Format the response as a JSON array of objects with the following structure:
-        [
-          {
-            "question": "Question text",
-            "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-            "correctAnswer": 0 // Index of correct answer (0-3)
-          }
-        ]
-        Make sure the questions are educational and test understanding of the topic.`;
-
-        const result = await fallbackModel.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
-        
-        console.log("Raw API response:", text);
-        
-        // Try to find JSON in the response or use fallbacks
-        if (!text || text.trim().length === 0) {
-          console.log("Empty response from API, using fallback");
-          const category = findMatchingCategory(topic, description);
-          return fallbackQuizzes[category || "DEFAULT"];
-        }
-        
-        // Ensure the response is valid JSON
-        try {
-          // Parse the JSON response
-          const quiz = JSON.parse(text);
-          
-          // Validate quiz structure
-          if (Array.isArray(quiz) && quiz.length > 0 && quiz[0].question && 
-              Array.isArray(quiz[0].options) && quiz[0].options.length > 0 && 
-              typeof quiz[0].correctAnswer === 'number') {
-            return quiz;
-          } else {
-            console.error("Invalid quiz format received:", quiz);
-            throw new Error("Invalid quiz format");
-          }
-        } catch (fallbackParseError) {
-          console.error("Error parsing fallback quiz JSON:", fallbackParseError);
-          console.log("Raw fallback response:", text);
-          
-          // Get category for fallback
-          const fallbackCategory = Object.values(TOPIC_CATEGORIES).find(cat => 
-            topic.toLowerCase().includes(cat.toLowerCase()) || 
-            description.toLowerCase().includes(cat.toLowerCase())
-          );
-          
-          // Return fallback quiz
-          return fallbackQuizzes[fallbackCategory || "DEFAULT"];
-        }
-      } catch (fallbackError) {
-        console.error("Error with fallback model:", fallbackError);
-      }
-    }
-    
     // Find the category that best matches the topic
-    const category = Object.values(TOPIC_CATEGORIES).find(cat => 
-      topic.toLowerCase().includes(cat.toLowerCase()) || 
-      description.toLowerCase().includes(cat.toLowerCase())
-    );
+    const category = findMatchingCategory(topic, description);
     
     // Return fallback quiz questions based on category
     return fallbackQuizzes[category || "DEFAULT"];

@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { financeTopics } from "@/data/finance-learning-content";
 import { searchYouTubeVideos, getVideoDetails, formatDuration, type YouTubeVideo } from "@/lib/youtube";
 import { generateQuizForTopic } from "@/data/finance-learning-content";
+import { generateRelatedTopics, type GeneratedTopic } from "@/lib/topic-generator";
 
 interface Quiz {
   questions: {
@@ -38,6 +39,7 @@ interface Topic {
   quiz?: {
     questions: QuizQuestion[];
   };
+  videos?: any[];
 }
 
 interface LearningProgress {
@@ -98,6 +100,9 @@ export default function LearnFinancePage() {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [showQuizSetup, setShowQuizSetup] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [generatedTopics, setGeneratedTopics] = useState<GeneratedTopic[]>([]);
+  const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
     if (!user?.uid) {
@@ -518,8 +523,57 @@ export default function LearnFinancePage() {
     setQuizResult(null);
   };
 
-  const filteredTopics = topics.filter(topic => {
-    const matchesSearch = topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  // Handle search input change
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+    // Only filter existing topics while typing
+    setSearchQuery(e.target.value);
+  };
+
+  // Handle search submission
+  const handleSearchSubmit = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!searchInput.trim()) {
+        setGeneratedTopics([]);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const newTopics = await generateRelatedTopics(searchInput);
+        setGeneratedTopics(newTopics);
+        
+        // Fetch videos for new topics
+        newTopics.forEach(topic => {
+          fetchTopicVideos({
+            ...topic,
+            completed: false,
+            progress: 0,
+            videos: []
+          });
+        });
+      } catch (error) {
+        console.error("Error generating topics:", error);
+        toast.error("Failed to generate topics");
+      } finally {
+        setIsSearching(false);
+      }
+    }
+  };
+
+  // Modify the existing topics state to include generated topics
+  const allTopics = [...topics, ...generatedTopics.map(topic => ({
+    ...topic,
+    completed: false,
+    progress: 0,
+    videos: []
+  }))];
+
+  // Update the filtered topics logic
+  const filteredTopics = allTopics.filter(topic => {
+    const matchesSearch = !searchQuery.trim() || 
+      topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       topic.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "all" || topic.category === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -571,11 +625,17 @@ export default function LearnFinancePage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
-                  placeholder="Search topics..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search or discover new financial topics (press Enter to search)..."
+                  value={searchInput}
+                  onChange={handleSearchInputChange}
+                  onKeyDown={handleSearchSubmit}
                   className="pl-10 h-12 rounded-xl border-2 focus:border-primary/50 focus:ring-1 focus:ring-primary/50"
                 />
+                {isSearching && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                  </div>
+                )}
               </div>
               <div className="flex gap-2 overflow-x-auto pb-2">
                 <Button
@@ -585,7 +645,7 @@ export default function LearnFinancePage() {
                 >
                   All Topics
                 </Button>
-                {Array.from(new Set(topics.map(t => t.category))).map((category) => (
+                {Array.from(new Set(allTopics.map(t => t.category))).map((category) => (
                   <Button
                     key={category}
                     variant={selectedCategory === category ? "default" : "outline"}
