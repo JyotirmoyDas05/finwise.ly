@@ -22,14 +22,47 @@ All planned features have been successfully implemented and the application is r
 
 ## Features
 
-- 📊 Dashboard for financial overview
-- 💰 Expense tracking and management
-- 🎯 Goal setting and progress tracking
-- 📚 Interactive financial learning resources
-- 🤖 AI-powered financial advice and assistance
-- 🌓 Dark/Light mode support
-- 🔒 Secure authentication
-- 📱 Responsive design
+- 📊 **Advanced Dashboard**
+  - Real-time financial health overview
+  - Interactive expense tracking and categorization
+  - Dynamic charts and visualizations for expense analysis
+  - Monthly budget overview
+
+- 💰 **Smart Finance Management**
+  - Manual expense tracking and categorization
+  - Budget planning and tracking
+  - Transaction history
+  - Expense analytics and insights
+
+- 🎯 **Goal Setting & Tracking**
+  - Custom financial goal creation
+  - Progress tracking with visual indicators
+  - Milestone celebrations
+  - Goal-based savings suggestions
+
+- 📚 **Interactive Learning Hub**
+  - Comprehensive financial education modules
+  - Interactive quizzes with scoring system
+  - Video tutorials on financial topics
+  - Progress tracking
+  - Downloadable resources
+
+- 🤖 **AI Financial Assistant**
+  - Natural language query processing
+  - Basic financial advice
+  - Budget suggestions
+  - Learning recommendations
+
+- 🔒 **Security**
+  - Secure authentication with Firebase
+  - Protected routes
+  - Email verification
+
+- 📱 **User Experience**
+  - Responsive design for all devices
+  - Dark/Light mode support
+  - Intuitive navigation
+  - Real-time updates
 
 ## Tech Stack
 
@@ -204,27 +237,41 @@ yarn start
 ```
 finwise-ly/
 ├── src/
-│   ├── app/              # Next.js app directory with all routes
-│   │   ├── api/          # API routes
-│   │   ├── auth/         # Authentication pages
-│   │   ├── finances/     # Finance management pages
-│   │   ├── goals/        # Goal tracking pages
-│   │   ├── learn/        # Learning resources pages
-│   │   ├── ask/          # AI assistant pages
-│   │   └── settings/     # User settings pages
-│   ├── components/       # Reusable UI components
-│   │   ├── ui/           # Basic UI components
+│   ├── app/                    # Next.js app directory
+│   │   ├── api/               # API routes
+│   │   ├── components/        # Page-specific components
+│   │   ├── context/          # React context providers
+│   │   ├── dashboard/        # Dashboard pages
+│   │   ├── login/           # Authentication pages
+│   │   ├── profile-setup/   # User onboarding
+│   │   ├── signup/         # Registration pages
+│   │   ├── lib/           # App-specific utilities
+│   │   ├── globals.css    # Global styles
+│   │   └── layout.tsx    # Root layout
+│   ├── components/        # Shared components
+│   │   ├── ui/           # UI components library
 │   │   ├── charts/       # Chart components
-│   │   └── forms/        # Form components
-│   ├── lib/              # Utility functions and configurations
-│   │   ├── firebase/     # Firebase configuration
-│   │   ├── auth/         # Authentication utilities
-│   │   └── ai/           # AI integration utilities
-│   └── styles/           # Global styles
-├── public/               # Static assets
-│   └── DashBoard.png     # Dashboard screenshot
-├── .env.local            # Environment variables
-└── package.json          # Project dependencies
+│   │   ├── forms/        # Form components
+│   │   ├── educational-card.tsx
+│   │   ├── video-tutorial-card.tsx
+│   │   ├── expense-distribution-chart.tsx
+│   │   ├── budget-comparison-chart.tsx
+│   │   ├── expense-breakdown-chart.tsx
+│   │   └── dashboard-skeleton.tsx
+│   ├── data/             # Static data and constants
+│   │   ├── quiz/        # Quiz questions and answers
+│   │   └── tutorials/   # Learning resources
+│   ├── hooks/           # Custom React hooks
+│   └── lib/             # Shared utilities
+│       ├── firebase/    # Firebase configuration
+│       ├── auth/        # Authentication utilities
+│       └── ai/          # AI integration utilities
+├── public/              # Static assets
+│   ├── images/         # Image assets
+│   └── icons/         # Icon assets
+├── .env.example        # Environment variables template
+├── .env.local         # Local environment variables
+└── package.json       # Project dependencies
 ```
 
 ## Key Features Implementation
