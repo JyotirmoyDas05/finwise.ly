@@ -60,7 +60,6 @@ All planned features have been successfully implemented and the application is r
 
 - 📱 **User Experience**
   - Responsive design for all devices
-  - Dark/Light mode support
   - Intuitive navigation
   - Real-time updates
 
