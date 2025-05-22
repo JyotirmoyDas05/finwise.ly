@@ -245,6 +245,15 @@ p {
   overflow-x: hidden;
 }
 
+/* Ensure sections and containers do not show scrollbars during animations */
+section {
+  overflow: hidden;
+}
+
+.container {
+  overflow: hidden;
+}
+
 /* Better card styles for mobile */
 @media (max-width: 640px) {
   .card {

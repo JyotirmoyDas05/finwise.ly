@@ -5,6 +5,7 @@ const config = {
   content: [
     "./src/app/dashboard/**/*.{ts,tsx}",
     "./src/components/**/*.{ts,tsx}",
+    "./src/app/globals.css", // Include global styles
   ],
   prefix: "",
   theme: {
@@ -83,4 +84,4 @@ const config = {
   plugins: [require("tailwindcss-animate")],
 } satisfies Config
 
-export default config 
+export default config

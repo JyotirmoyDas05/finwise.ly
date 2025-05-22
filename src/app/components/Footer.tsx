@@ -1,15 +1,137 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 const Footer = () => {
+  const footerRef = useRef<HTMLElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const socialRef = useRef<HTMLDivElement>(null);
+  const copyrightRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Initial state
+      gsap.set([logoRef.current, contentRef.current, socialRef.current, copyrightRef.current], {
+        opacity: 0,
+        y: 30,
+      });
+
+      // Animation timeline
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse',
+        }
+      });
+
+      tl.to(logoRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: 'power2.out',
+      })
+      .to(contentRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: 'power2.out',
+      }, '-=0.6')
+      .to(socialRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+      }, '-=0.4')
+      .to(copyrightRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+      }, '-=0.3');
+
+      // Social icons hover animations
+      const socialIcons = socialRef.current?.querySelectorAll('a');
+      if (socialIcons) {
+        socialIcons.forEach(icon => {
+          icon.addEventListener('mouseenter', () => {
+            gsap.to(icon, {
+              scale: 1.2,
+              rotation: 10,
+              duration: 0.3,
+              ease: 'power2.out',
+            });
+          });
+
+          icon.addEventListener('mouseleave', () => {
+            gsap.to(icon, {
+              scale: 1,
+              rotation: 0,
+              duration: 0.3,
+              ease: 'power2.out',
+            });
+          });
+        });
+      }
+
+      // Links hover animations
+      const links = footerRef.current?.querySelectorAll('a[href^="#"], a[href="#"]');
+      if (links) {
+        links.forEach(link => {
+          link.addEventListener('mouseenter', () => {
+            gsap.to(link, {
+              x: 5,
+              duration: 0.2,
+              ease: 'power2.out',
+            });
+          });
+
+          link.addEventListener('mouseleave', () => {
+            gsap.to(link, {
+              x: 0,
+              duration: 0.2,
+              ease: 'power2.out',
+            });
+          });
+        });
+      }
+
+      // Smooth scroll for anchor links
+      const anchorLinks = footerRef.current?.querySelectorAll('a[href^="#"]');
+      if (anchorLinks) {
+        anchorLinks.forEach(link => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href');
+            if (targetId && targetId !== "#") {
+              gsap.to(window, {
+                scrollTo: { y: targetId, offsetY: 70 }, // Adjust offsetY for fixed headers if needed
+                duration: 1,
+                ease: 'power2.out',
+              });
+            }
+          });
+        });
+      }
+
+    }, footerRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <footer className="bg-white dark:bg-dark-900 py-12">
+    <footer ref={footerRef} className="bg-white dark:bg-dark-900 py-12">
       <div className="container mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Description */}
-          <div className="col-span-1 md:col-span-2">
+          <div ref={logoRef} className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white font-normal text-lg">F</div>
               <h2 className="font-roboto text-2xl font-semibold text-dark-900 dark:text-white">FinWise.ly</h2>
@@ -17,7 +139,7 @@ const Footer = () => {
             <p className="font-body text-dark-700 dark:text-white mt-2 max-w-md leading-relaxed">
               AI-powered financial guidance to help you make smarter decisions and build <span className="text-green">better money habits</span>.
             </p>
-            <div className="flex space-x-4 mt-6">
+            <div ref={socialRef} className="flex space-x-4 mt-6">
               <a href="#" className="text-dark-700 dark:text-white hover:text-green transition-colors">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
@@ -37,7 +159,7 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div ref={contentRef}>
             <h3 className="font-sans text-lg font-medium mb-4 text-dark-900 dark:text-white">
               Quick <span className="text-green">Links</span>
             </h3>
@@ -95,7 +217,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-dark-200 dark:border-dark-700 pt-8 text-center text-dark-700 dark:text-white">
+        <div ref={copyrightRef} className="mt-12 border-t border-dark-200 dark:border-dark-700 pt-8 text-center text-dark-700 dark:text-white">
           <p className="font-body">&copy; {new Date().getFullYear()} FinWise.ly. All rights reserved.</p>
         </div>
       </div>
