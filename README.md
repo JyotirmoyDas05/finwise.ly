@@ -60,7 +60,6 @@ All planned features have been successfully implemented and the application is r
 
 - 📱 **User Experience**
   - Responsive design for all devices
-  - Dark/Light mode support
   - Intuitive navigation
   - Real-time updates
 
@@ -78,8 +77,6 @@ All planned features have been successfully implemented and the application is r
   - Sonner (for toast notifications) ![Sonner](https://img.shields.io/badge/Sonner-2.0.1-blue)
 - **State Management**: React Hooks
 - **Charts**: Recharts for financial visualizations ![Recharts](https://img.shields.io/badge/Recharts-2.15.0-blue)
-- **Markdown Support**: React Markdown with Remark GFM
-- **Code Highlighting**: Shiki
 
 ### Backend
 - **Framework**: Next.js API Routes ![Next.js](https://img.shields.io/badge/Next.js-15-blue)
