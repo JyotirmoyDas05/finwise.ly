@@ -12,7 +12,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { theme, setTheme } = useTheme();
   
-  const headerRef = useRef<HTMLHeaderElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLAnchorElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const authButtonsRef = useRef<HTMLDivElement>(null);
@@ -279,4 +279,4 @@ const Header = () => {
   );
 };
 
-export default Header; 
+export default Header;
